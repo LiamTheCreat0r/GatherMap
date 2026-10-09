@@ -1,0 +1,20 @@
+include:
+    - docker/supabase/docker-compose.yml
+
+services:
+    db-migrate:
+        image: node:20-alpine
+        working_dir: /work
+        volumes:
+            - ./supabase:/work/supabase
+        depends_on:
+            db:
+                condition: service_healthy
+            auth:
+                condition: service_healthy
+            storage:
+                condition: service_healthy
+        command: >
+            npx --yes supabase db push --yes
+            --db-url "postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?sslmode=disable"
+        restart: "no"
