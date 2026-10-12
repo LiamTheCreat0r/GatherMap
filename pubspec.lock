@@ -128,7 +128,7 @@ packages:
       sha256: b7cc2390aac296c083bea762859413eb1cf5b630c70e0c7e4d831018f762a8b2
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.9"
+    version: "2.0.0"
   cupertino_ui:
     dependency: transitive
     description:
@@ -137,7 +137,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-    version: "2.0.0"
   dart_jsonwebtoken:
     dependency: transitive
     description:
@@ -201,6 +200,19 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  glob:
+    dependency: transitive
+    description:
+      name: glob
+      sha256: "218aeb56050c714f62a3182775320dfa04602b55074873e24e31bbd39bda96fb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   google_fonts:
     dependency: "direct main"
     description:
@@ -214,16 +226,6 @@ packages:
     description:
       name: hooks
       sha256: eaac480a35ec0814146c2c48d96aaa829e0e44a7662c88ae84c9edf4bc35651f
-  flutter_web_plugins:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  glob:
-    dependency: transitive
-    description:
-      name: glob
-      sha256: "218aeb56050c714f62a3182775320dfa04602b55074873e24e31bbd39bda96fb"
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
@@ -243,8 +245,16 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  intl:
+  iceberg:
     dependency: transitive
+    description:
+      name: iceberg
+      sha256: "76af358406ae973a8f8e604531cabd2f27cbc7b5cb9fa9b8a195145d462d1b85"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.5"
+  intl:
+    dependency: "direct main"
     description:
       name: intl
       sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
@@ -275,22 +285,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  iceberg:
-    dependency: transitive
-    description:
-      name: iceberg
-      sha256: "76af358406ae973a8f8e604531cabd2f27cbc7b5cb9fa9b8a195145d462d1b85"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.5"
-  intl:
-    dependency: "direct main"
-    description:
-      name: intl
-      sha256: "1ca20c894b1717686a2319b8548763d812bc0aabdac580420a44c5178c57a867"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.20.3"
   json_annotation:
     dependency: transitive
     description:
@@ -371,14 +365,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.0"
-  objective_c:
-    dependency: transitive
-    description:
-      name: objective_c
-      sha256: "5c80c2ad6e2c0397de5db38c6d653e69616a3397e13aa7633bf39eb668f2041b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.6.2"
   mime:
     dependency: transitive
     description:
@@ -387,6 +373,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "5c80c2ad6e2c0397de5db38c6d653e69616a3397e13aa7633bf39eb668f2041b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.6.2"
   package_config:
     dependency: transitive
     description:
@@ -832,9 +826,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.4"
-sdks:
-  dart: ">=3.13.0 <4.0.0"
-  flutter: ">=3.47.0"
   yet_another_json_isolate:
     dependency: transitive
     description:
@@ -845,4 +836,4 @@ sdks:
     version: "3.0.0-dev.2"
 sdks:
   dart: "3.13.5"
-  flutter: ">=3.44.0"
+  flutter: ">=3.47.0"
