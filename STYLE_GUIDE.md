@@ -1,30 +1,30 @@
 # Github
 ## Commits
-|But du Commit|Nom du Commit|
-|--------|------------------|
-|Création|Feat-(Description)|
-|Modification|Fix-(Description)|
-|Documentation|Doc-(Description)|
+|Goal|Name|
+|-----|-----|
+|creating a feature|Feat-(Description)|
+|updating a feature|Fix-(Description)|
+|adding/updating the documentation|Doc-(Description)|
 
-## Branches
-|But de la Branche|Nom de la Branche|
-|--------|------------------|
-|Ajout d'une fonctionnalité|Create-(Description)|
-|Modification d'une fonctionnalité|Update-(Description)|
-|Resolution d'un bug|Patch-(Description)|
+## Branchs
+|Goal|Name|
+|-----|-----|
+|adding a feature|create-(description)|
+|updating a feature|update-(description)|
+|patching a bug|patch-(description)|
 
 # Code
-## Formattage
-|Element|Convention de Nommage|
+## Formatting
+|Element|Naming Convention|
 |--------|------------------|
-|path et fichiers|snake_case|
-|classe|PascalCase|
-|méthodes|camelCase|
+|path and files|snake_case|
+|class|PascalCase|
+|methods|camelCase|
 
-## Structure projet
+## Project structure
     lib/
     ├── main.dart
-    ├── models/ (Requetes à la base de donnée)
+    ├── models/ (Request to database)
         ├── todo.dart
         └── app_user.dart
     ├── controllers/
