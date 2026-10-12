@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict 6YtmxE3iRGLVOTd5k8sbFJGBt5J3bgp3s6W62c7trnNa5tPDuSIVPwt7CBeoEyD
+-- \restrict cfIIEg18bjvCBJr9F0JRsrYJLYssMHKYjpkk39Y8KCzArHRzTdZk6Tp1ooFKevM
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -262,7 +262,7 @@ INSERT INTO "public"."message" ("id", "created_at", "image", "content", "sender_
 --
 
 INSERT INTO "storage"."buckets" ("id", "name", "owner", "created_at", "updated_at", "public", "avif_autodetection", "file_size_limit", "allowed_mime_types", "owner_id", "type", "versioning_status", "lifecycle_configuration", "lifecycle_configuration_generation") VALUES
-	('event images', 'event images', NULL, '2026-09-25 12:55:57.416046+00', '2026-09-25 12:55:57.416046+00', false, false, NULL, NULL, NULL, 'STANDARD', 'DISABLED', NULL, NULL);
+	('event_images', 'event_images', NULL, '2026-10-12 12:37:08.032093+00', '2026-10-12 12:37:08.032093+00', false, false, NULL, NULL, NULL, 'STANDARD', 'DISABLED', NULL, NULL);
 
 
 --
@@ -281,8 +281,6 @@ INSERT INTO "storage"."buckets" ("id", "name", "owner", "created_at", "updated_a
 -- Data for Name: objects; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
 --
 
-INSERT INTO "storage"."objects" ("id", "bucket_id", "name", "owner", "created_at", "updated_at", "last_accessed_at", "metadata", "version", "owner_id", "user_metadata", "archived_at", "is_delete_marker", "is_versioned") VALUES
-	('9c028868-1786-425a-a1e5-06eab2b4ac9c', 'event images', '.emptyFolderPlaceholder', NULL, '2026-09-25 12:56:32.226159+00', '2026-09-25 12:56:32.226159+00', '2026-09-25 12:56:32.226159+00', '{"eTag": "\"d41d8cd98f00b204e9800998ecf8427e\"", "size": 0, "mimetype": "application/octet-stream", "cacheControl": "max-age=3600", "lastModified": "2026-09-25T12:56:32.225Z", "contentLength": 0, "httpStatusCode": 200}', '760e8230-4eb1-4cef-9e70-435ee759d38e', NULL, '{}', NULL, false, false);
 
 
 --
@@ -370,6 +368,6 @@ SELECT pg_catalog.setval('"public"."user_id_seq"', 23, true);
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict 6YtmxE3iRGLVOTd5k8sbFJGBt5J3bgp3s6W62c7trnNa5tPDuSIVPwt7CBeoEyD
+-- \unrestrict cfIIEg18bjvCBJr9F0JRsrYJLYssMHKYjpkk39Y8KCzArHRzTdZk6Tp1ooFKevM
 
 RESET ALL;
