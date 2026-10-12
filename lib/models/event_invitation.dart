@@ -44,7 +44,7 @@ class EventInvitation implements SupadartClass<EventInvitation> {
     return {
       if (id != null) 'id': id.toString(),
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (accepted != null) 'accepted': accepted,
+      'accepted': ?accepted,
       if (userId != null) 'user_id': userId.toString(),
       if (eventId != null) 'event_id': eventId.toString(),
     };

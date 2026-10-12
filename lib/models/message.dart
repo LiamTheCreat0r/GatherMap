@@ -48,8 +48,8 @@ class Message implements SupadartClass<Message> {
     return {
       if (id != null) 'id': id.toString(),
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (image != null) 'image': image,
-      if (content != null) 'content': content,
+      'image': ?image,
+      'content': ?content,
       if (senderId != null) 'sender_id': senderId.toString(),
       if (chatId != null) 'chat_id': chatId.toString(),
     };
