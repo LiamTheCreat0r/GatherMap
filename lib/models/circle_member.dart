@@ -46,7 +46,7 @@ class CircleMember implements SupadartClass<CircleMember> {
       if (userId != null) 'user_id': userId.toString(),
       if (circleId != null) 'circle_id': circleId.toString(),
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (userNickname != null) 'user_nickname': userNickname,
+      'user_nickname': ?userNickname,
     };
   }
 
