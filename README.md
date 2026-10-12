@@ -22,3 +22,9 @@ Data (optional)
 ```bash
 supabase db dump --data-only -f supabase/seed.sql
 ```
+
+Run database
+
+```bash
+supabase start && supabase db reset
+```
