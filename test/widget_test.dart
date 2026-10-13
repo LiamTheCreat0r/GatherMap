@@ -1,45 +1,128 @@
 // Basic widget tests for the app's navbar shell.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:gathermap/core/route.dart';
 import 'package:gathermap/main.dart';
 import 'package:gathermap/views/widgets/navbar.dart';
+import 'package:gathermap/views/widgets/nav_bar_shell.dart';
 
 void main() {
-  testWidgets('App renders navbar with four tabs', (WidgetTester tester) async {
+  setUp(() {
+    // Each test starts with the bar visible.
+    CurrentRoute.name.value = null;
+  });
+
+  testWidgets('App renders navbar with four icon-only tabs',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
     expect(find.byType(Navbar), findsOneWidget);
-    expect(find.byType(Tab), findsNWidgets(4));
+    expect(find.byType(NavBarShell), findsOneWidget);
+    expect(find.byType(SvgPicture), findsNWidgets(4));
 
-    // Default tab (initialIndex: 1) shows page 2.
-    expect(find.text('You have pressed the button 0 times on page 2 or 4.'),
-        findsOneWidget);
+    // Icon-only: no Material tabs and no text labels anywhere.
+    expect(find.byType(Tab), findsNothing);
+    for (final tab in NavTab.values) {
+      expect(find.text(tab.label), findsNothing);
+    }
   });
 
-  testWidgets('Tapping the FAB increments the page counter',
+  testWidgets('Active tab is orange and inactive tabs are warm gray',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pumpAndSettle();
+    final pictures = tester.widgetList<SvgPicture>(find.byType(SvgPicture)).toList();
 
-    expect(find.text('You have pressed the button 1 times on page 2 or 4.'),
-        findsOneWidget);
+    final activeFilter = pictures.first.colorFilter;
+    final inactiveFilter = pictures.last.colorFilter;
+
+    expect(
+      activeFilter,
+      const ColorFilter.mode(Color.fromARGB(255, 242, 100, 25), BlendMode.srcIn),
+    );
+    expect(
+      inactiveFilter,
+      const ColorFilter.mode(
+          Color.fromARGB(255, 154, 143, 131), BlendMode.srcIn),
+    );
   });
 
-  testWidgets('Switching tabs shows the corresponding page',
+  testWidgets('Tapping a tab changes the active index', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Tap the Map tab (index 1).
+    await tester.tap(find.byType(SvgPicture).at(1));
+    await tester.pumpAndSettle();
+
+    final navbar = tester.widget<Navbar>(find.byType(Navbar));
+    expect(navbar.currentIndex, 1);
+
+    // Tap the Profile tab (index 3).
+    await tester.tap(find.byType(SvgPicture).at(3));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Navbar>(find.byType(Navbar)).currentIndex, 3);
+  });
+
+  testWidgets('Detail route hides the navbar, popping restores it',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.person));
+    expect(find.byType(Navbar), findsOneWidget);
+
+    // Push a named event detail route.
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoutes.eventDetail.replaceAll(':id', '42'));
     await tester.pumpAndSettle();
 
-    expect(find.text('You have pressed the button 0 times in page 1 or 3.'),
-        findsOneWidget);
+    expect(find.byType(Navbar), findsNothing);
+    expect(find.text('Event details'), findsOneWidget);
+
+    // Pop back to the shell.
+    navigator.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Navbar), findsOneWidget);
+  });
+
+  testWidgets('Navbar spans the full width as a short bar at the bottom',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    final box = tester.renderObject<RenderBox>(find.byType(Navbar));
+    final topLeft = box.localToGlobal(Offset.zero);
+    final screen = tester.getSize(find.byType(MaterialApp));
+
+    // Full width, flush left.
+    expect(box.size.width, screen.width);
+    expect(topLeft.dx, 0);
+
+    // A bar, not a screen-height block: 24px icon + 12px padding either side.
+    expect(box.size.height, 48);
+
+    // Pinned to the bottom edge.
+    expect(topLeft.dy + box.size.height, screen.height);
+
+    // The four icons sit at the centre of four equal quarters, so their
+    // centres are evenly spaced by a quarter of the bar width.
+    final centers = tester
+        .widgetList<SvgPicture>(find.byType(SvgPicture))
+        .map((picture) =>
+            tester.getCenter(find.byWidget(picture)).dx)
+        .toList()
+      ..sort();
+
+    final spacing = screen.width / NavTab.values.length;
+    for (var i = 1; i < centers.length; i++) {
+      expect(centers[i] - centers[i - 1], closeTo(spacing, 0.01));
+    }
   });
 }

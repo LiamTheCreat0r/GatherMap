@@ -1,35 +1,28 @@
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [Scaffold].
+import '../../core/theme/custom_colors.dart';
+import '../../core/theme/custom_text_styles.dart';
 
-class ScaffoldExampleApp extends StatelessWidget {
-  const ScaffoldExampleApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(home: ScaffoldExample());
-  }
-}
-
-class ScaffoldExample extends StatefulWidget {
-  const ScaffoldExample({super.key});
-
-  @override
-  State<ScaffoldExample> createState() => _ScaffoldExampleState();
-}
-
-class _ScaffoldExampleState extends State<ScaffoldExample> {
-  int _count = 0;
+/// Placeholder page for the Events tab.
+///
+/// Intentionally empty; replace with the real Events screen later.
+class TestPage1 extends StatelessWidget {
+  const TestPage1({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CustomColors>();
+    final textStyles = Theme.of(context).extension<CustomTextStyles>();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Sample Code')),
-      body: Center(child: Text('You have pressed the button $_count times in page 1 or 3.')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() => _count++),
-        tooltip: 'Increment Counter',
-        child: const Icon(Icons.add),
+      backgroundColor: colors?.mainBackgroundColor,
+      body: Center(
+        child: Text(
+          'Test page 1',
+          style: textStyles?.bodyTextStyle.copyWith(
+            color: colors?.primaryTextColor,
+          ),
+        ),
       ),
     );
   }
