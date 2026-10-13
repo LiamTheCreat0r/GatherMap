@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'views/map.dart';
 
 import 'core/route.dart';
 import 'core/theme/app_themes.dart';
