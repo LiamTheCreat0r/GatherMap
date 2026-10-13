@@ -4,18 +4,18 @@
 import 'supadart_header.dart';
 
 class Event implements SupadartClass<Event> {
-  final BigInt id;
+  final BigInt? id;
   final BigInt ownerId;
   final DateTime scheduledAt;
   final String location;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final String name;
   final String emojiIcon;
   final String color;
   final bool isPublic;
 
   const Event({
-    required this.id,
+    this.id,
     required this.ownerId,
     required this.scheduledAt,
     required this.location,
@@ -123,7 +123,7 @@ class Event implements SupadartClass<Event> {
     return Event(
       id: jsonn['id'] != null
           ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+          : null,
       ownerId: jsonn['owner_id'] != null
           ? BigInt.parse(jsonn['owner_id'].toString())
           : BigInt.from(0),
@@ -133,7 +133,7 @@ class Event implements SupadartClass<Event> {
       location: jsonn['location'] != null ? jsonn['location'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : null,
       name: jsonn['name'] != null ? jsonn['name'].toString() : '',
       emojiIcon: jsonn['emoji_icon'] != null
           ? jsonn['emoji_icon'].toString()
