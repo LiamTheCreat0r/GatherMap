@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gathermap/views/account_page.dart';
 import '../test_page_1.dart';
 import '../test_page_2.dart';
 
@@ -28,7 +29,7 @@ class Navbar extends StatelessWidget {
             ScaffoldExampleApp(),
             ScaffoldExampleApp2(),
             ScaffoldExampleApp(),
-            ScaffoldExampleApp2()
+            AccountPage()
           ],
         ),
       ),
