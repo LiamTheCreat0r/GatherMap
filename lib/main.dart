@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'views/map.dart';
 
 import 'core/route.dart';
 import 'core/theme/app_themes.dart';
@@ -55,8 +54,6 @@ class _EventDetailPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Event details')),
-    );
+    return const Scaffold(body: Center(child: Text('Event details')));
   }
 }
