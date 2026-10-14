@@ -212,40 +212,6 @@ class Chat extends StatelessWidget {
   }
 }
 
-/// Orange page header holding the page title.
-class _ChatsHeader extends StatelessWidget {
-  const _ChatsHeader({required this.colors, required this.textStyles});
-
-  final CustomColors colors;
-  final CustomTextStyles textStyles;
-
-  @override
-  Widget build(BuildContext context) {
-    // Let the orange fill the status bar area, and keep the title clear of the
-    // notch/cutout.
-    final topInset = MediaQuery.of(context).padding.top;
-
-    return ColoredBox(
-      color: colors.accentColor,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: topInset + 6,
-          left: 10,
-          right: 10,
-          bottom: 12,
-        ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Messages',
-            style: textStyles.pageTitleStyle.copyWith(color: Colors.white),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
     required this.label,
