@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gathermap/views/chat.dart';
 
 import '../../core/route.dart';
 import '../events_list.dart';
 import '../map_page.dart';
-import '../test_page_3.dart';
 import '../test_page_4.dart';
 import 'navbar.dart';
 
@@ -52,7 +52,7 @@ class _NavBarShellState extends State<NavBarShell> {
   List<Widget> _pages() => [
     const EventsList(),
     _visited.contains(1) ? const MapPage() : const SizedBox.shrink(),
-    _visited.contains(2) ? const TestPage3() : const SizedBox.shrink(),
+    _visited.contains(2) ? const Chat() : const SizedBox.shrink(),
     _visited.contains(3) ? const TestPage4() : const SizedBox.shrink(),
   ];
 
