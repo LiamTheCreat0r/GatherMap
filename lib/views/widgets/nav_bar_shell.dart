@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/route.dart';
 import '../events_list.dart';
 import '../test_page_2.dart';
-import '../map.dart';
+import 'map.dart';
 import '../test_page_3.dart';
 import '../test_page_4.dart';
 import 'navbar.dart';

@@ -7,8 +7,8 @@ class Map extends StatelessWidget {
   Widget build(BuildContext context) {
     return MapLibreMap(
       initialCameraPosition: const CameraPosition(
-        target: LatLng(51.2, 27.2),
-        zoom: 5,
+        target: LatLng(43.57, 1.464),
+        zoom: 15,
       ),
       styleString:
           'https://api.maptiler.com/maps/01a1343d-e0c3-7e05-93c1-743d65f9b644/style.json?key=nHhdC9Q6mdTwQ6qo9eiV',
