@@ -4,24 +4,24 @@
 import 'supadart_header.dart';
 
 class BlockedUser implements SupadartClass<BlockedUser> {
-  final BigInt id;
+  final String id;
   final DateTime blockedAt;
-  final BigInt? blockedUser;
-  final BigInt? userWhoBlocked;
+  final String blockerId;
+  final String blockedId;
 
   const BlockedUser({
     required this.id,
     required this.blockedAt,
-    this.blockedUser,
-    this.userWhoBlocked,
+    required this.blockerId,
+    required this.blockedId,
   });
 
   static String get schema_name => 'public';
   static String get table_name => 'blocked_user';
   static String get c_id => 'id';
   static String get c_blockedAt => 'blocked_at';
-  static String get c_blockedUser => 'blocked_user';
-  static String get c_userWhoBlocked => 'user_who_blocked';
+  static String get c_blockerId => 'blocker_id';
+  static String get c_blockedId => 'blocked_id';
 
   static List<BlockedUser> converter(List<Map<String, dynamic>> data) {
     return data.map(BlockedUser.fromJson).toList();
@@ -32,61 +32,59 @@ class BlockedUser implements SupadartClass<BlockedUser> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? blockedAt,
-    BigInt? blockedUser,
-    BigInt? userWhoBlocked,
+    String? blockerId,
+    String? blockedId,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      'id': ?id,
       if (blockedAt != null) 'blocked_at': blockedAt.toUtc().toIso8601String(),
-      if (blockedUser != null) 'blocked_user': blockedUser.toString(),
-      if (userWhoBlocked != null) 'user_who_blocked': userWhoBlocked.toString(),
+      'blocker_id': ?blockerId,
+      'blocked_id': ?blockedId,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? blockedAt,
-    BigInt? blockedUser,
-    BigInt? userWhoBlocked,
+    required String blockerId,
+    required String blockedId,
   }) {
     return _generateMap(
       id: id,
       blockedAt: blockedAt,
-      blockedUser: blockedUser,
-      userWhoBlocked: userWhoBlocked,
+      blockerId: blockerId,
+      blockedId: blockedId,
     );
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? blockedAt,
-    BigInt? blockedUser,
-    BigInt? userWhoBlocked,
+    String? blockerId,
+    String? blockedId,
   }) {
     return _generateMap(
       id: id,
       blockedAt: blockedAt,
-      blockedUser: blockedUser,
-      userWhoBlocked: userWhoBlocked,
+      blockerId: blockerId,
+      blockedId: blockedId,
     );
   }
 
   factory BlockedUser.fromJson(Map<String, dynamic> jsonn) {
     return BlockedUser(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       blockedAt: jsonn['blocked_at'] != null
           ? DateTime.parse(jsonn['blocked_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),
-      blockedUser: jsonn['blocked_user'] != null
-          ? BigInt.parse(jsonn['blocked_user'].toString())
-          : null,
-      userWhoBlocked: jsonn['user_who_blocked'] != null
-          ? BigInt.parse(jsonn['user_who_blocked'].toString())
-          : null,
+      blockerId: jsonn['blocker_id'] != null
+          ? jsonn['blocker_id'].toString()
+          : '',
+      blockedId: jsonn['blocked_id'] != null
+          ? jsonn['blocked_id'].toString()
+          : '',
     );
   }
 
@@ -94,8 +92,8 @@ class BlockedUser implements SupadartClass<BlockedUser> {
     return _generateMap(
       id: id,
       blockedAt: blockedAt,
-      blockedUser: blockedUser,
-      userWhoBlocked: userWhoBlocked,
+      blockerId: blockerId,
+      blockedId: blockedId,
     );
   }
 }
