@@ -38,11 +38,11 @@ class Friend implements SupadartClass<Friend> {
     String? userId2,
   }) {
     return {
-      if (id != null) 'id': id,
+      'id': ?id,
       if (friendsSince != null)
         'friends_since': friendsSince.toUtc().toIso8601String(),
-      if (userId1 != null) 'user_id_1': userId1,
-      if (userId2 != null) 'user_id_2': userId2,
+      'user_id_1': ?userId1,
+      'user_id_2': ?userId2,
     };
   }
 

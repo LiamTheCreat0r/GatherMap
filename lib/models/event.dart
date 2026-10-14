@@ -58,16 +58,16 @@ class Event implements SupadartClass<Event> {
     bool? isPublic,
   }) {
     return {
-      if (id != null) 'id': id,
-      if (ownerId != null) 'owner_id': ownerId,
+      'id': ?id,
+      'owner_id': ?ownerId,
       if (scheduledAt != null)
         'scheduled_at': scheduledAt.toUtc().toIso8601String(),
-      if (location != null) 'location': location,
+      'location': ?location,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (name != null) 'name': name,
-      if (emojiIcon != null) 'emoji_icon': emojiIcon,
-      if (color != null) 'color': color,
-      if (isPublic != null) 'is_public': isPublic,
+      'name': ?name,
+      'emoji_icon': ?emojiIcon,
+      'color': ?color,
+      'is_public': ?isPublic,
     };
   }
 

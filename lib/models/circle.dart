@@ -34,9 +34,9 @@ class Circle implements SupadartClass<Circle> {
     String? ownerId,
   }) {
     return {
-      if (id != null) 'id': id,
+      'id': ?id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (ownerId != null) 'owner_id': ownerId,
+      'owner_id': ?ownerId,
     };
   }
 

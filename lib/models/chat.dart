@@ -33,10 +33,10 @@ class Chat implements SupadartClass<Chat> {
     String? friendId,
   }) {
     return {
-      if (id != null) 'id': id,
-      if (circleId != null) 'circle_id': circleId,
-      if (eventId != null) 'event_id': eventId,
-      if (friendId != null) 'friend_id': friendId,
+      'id': ?id,
+      'circle_id': ?circleId,
+      'event_id': ?eventId,
+      'friend_id': ?friendId,
     };
   }
 

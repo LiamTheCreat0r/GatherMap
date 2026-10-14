@@ -66,17 +66,17 @@ class User implements SupadartClass<User> {
     bool? privateAccount,
   }) {
     return {
-      if (id != null) 'id': id,
+      'id': ?id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
       if (birthdate != null) 'birthdate': birthdate.toIso8601String(),
-      if (username != null) 'username': username,
-      if (name != null) 'name': name,
-      if (surname != null) 'surname': surname,
-      if (city != null) 'city': city,
-      if (email != null) 'email': email,
-      if (hashPassword != null) 'hash_password': hashPassword,
-      if (profilePicture != null) 'profile_picture': profilePicture,
-      if (privateAccount != null) 'private_account': privateAccount,
+      'username': ?username,
+      'name': ?name,
+      'surname': ?surname,
+      'city': ?city,
+      'email': ?email,
+      'hash_password': ?hashPassword,
+      'profile_picture': ?profilePicture,
+      'private_account': ?privateAccount,
     };
   }
 

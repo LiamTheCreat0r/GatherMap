@@ -38,10 +38,10 @@ class BlockedUser implements SupadartClass<BlockedUser> {
     String? blockedId,
   }) {
     return {
-      if (id != null) 'id': id,
+      'id': ?id,
       if (blockedAt != null) 'blocked_at': blockedAt.toUtc().toIso8601String(),
-      if (blockerId != null) 'blocker_id': blockerId,
-      if (blockedId != null) 'blocked_id': blockedId,
+      'blocker_id': ?blockerId,
+      'blocked_id': ?blockedId,
     };
   }
 
