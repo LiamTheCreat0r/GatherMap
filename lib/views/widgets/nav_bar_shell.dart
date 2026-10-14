@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gathermap/views/account_page.dart';
 
 import '../../core/route.dart';
 import '../events_list.dart';
-import '../test_page_2.dart';
 import '../map.dart';
 import '../test_page_3.dart';
-import '../test_page_4.dart';
 import 'navbar.dart';
 
 /// Hosts the four tab pages and the bottom navigation bar.
@@ -31,7 +30,7 @@ class _NavBarShellState extends State<NavBarShell> {
     EventsList(),
     Map(),
     TestPage3(),
-    TestPage4(),
+    AccountPage(),
   ];
 
   void _onTap(int index) {
