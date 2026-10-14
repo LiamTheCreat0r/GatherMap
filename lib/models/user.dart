@@ -26,7 +26,7 @@ class User implements SupadartClass<User> {
     required this.city,
     required this.email,
     required this.hashPassword,
-    this.profilePicture,
+    required this.profilePicture,
     required this.privateAccount,
   });
 
