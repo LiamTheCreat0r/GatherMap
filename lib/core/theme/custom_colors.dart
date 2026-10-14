@@ -11,6 +11,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
   final Color secondarySurfaceColor;
   final Color translucentSurfaceColor;
 
+  // All Brand Colors
+  final Color accentColor;
+
   // All Border Colors
   final Color borderColor;
   final Color phoneBorderColor;
@@ -31,6 +34,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     required this.cardColor,
     required this.secondarySurfaceColor,
     required this.translucentSurfaceColor,
+    required this.accentColor,
     required this.borderColor,
     required this.phoneBorderColor,
     required this.primaryTextColor,
@@ -50,6 +54,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
     cardColor: Color.fromARGB(255, 247, 245, 242),
     secondarySurfaceColor: Color.fromARGB(255, 240, 237, 232),
     translucentSurfaceColor: Color.fromARGB(204, 255, 255, 255),
+
+    // All Brand Colors
+    accentColor: Color.fromARGB(255, 242, 100, 25),
 
     // All Border Colors
     borderColor: Color.fromARGB(255, 229, 225, 219),
@@ -76,6 +83,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
     secondarySurfaceColor: Color.fromARGB(255, 38, 33, 30),
     translucentSurfaceColor: Color.fromARGB(229, 28, 25, 23),
 
+    // All Brand Colors
+    accentColor: Color.fromARGB(255, 242, 100, 25),
+
     // All Border Colors
     borderColor: Color.fromARGB(255, 58, 51, 46),
     phoneBorderColor: Color.fromARGB(255, 5, 5, 5),
@@ -98,6 +108,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     Color? cardColor,
     Color? secondarySurfaceColor,
     Color? translucentSurfaceColor,
+    Color? accentColor,
     Color? borderColor,
     Color? phoneBorderColor,
     Color? primaryTextColor,
@@ -116,6 +127,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
           secondarySurfaceColor ?? this.secondarySurfaceColor,
       translucentSurfaceColor:
           translucentSurfaceColor ?? this.translucentSurfaceColor,
+      accentColor: accentColor ?? this.accentColor,
       borderColor: borderColor ?? this.borderColor,
       phoneBorderColor: phoneBorderColor ?? this.phoneBorderColor,
       primaryTextColor: primaryTextColor ?? this.primaryTextColor,
@@ -157,6 +169,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
         other.translucentSurfaceColor,
         t,
       )!,
+      accentColor: Color.lerp(accentColor, other.accentColor, t)!,
       borderColor: Color.lerp(borderColor, other.borderColor, t)!,
       phoneBorderColor: Color.lerp(
         phoneBorderColor,
