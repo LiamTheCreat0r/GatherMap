@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class Circle implements SupadartClass<Circle> {
-  final String id;
-  final DateTime createdAt;
+  final String? id;
+  final DateTime? createdAt;
   final String ownerId;
 
   const Circle({

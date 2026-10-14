@@ -7,7 +7,7 @@ import 'package:gathermap/models/event_invitation.dart';
 //Move it to the test file
 void main() async{
   //Test Get
-  Object eventInvitation = await RequestEventInvitation.get(BigInt.from(5));
+  Object eventInvitation = await RequestEventInvitation.get("");
   print("Result get ${eventInvitation.toString()}");
 
   //Test Post
@@ -51,14 +51,14 @@ void main() async{
   // await RequestEventInvitation.patch(eventInvitationTestPost.id!,eventInvitationTestPost.toJson());
 
   //Test Delete
-  await RequestEventInvitation.delete(BigInt.from(14));
+  await RequestEventInvitation.delete("");
 }
 
 class RequestEventInvitation {
   // URI to eventInvitation endpoint
   static final TypeObject _type = TypeObject.EVENT_INVITATION;
 
-  static Future<Object> get(BigInt? id) async {
+  static Future<Object> get(String? id) async {
     HTTPContainer recuperation = await Request.get(_type,id);
     if(recuperation.getCode()!=200){
       return false;
@@ -72,17 +72,17 @@ class RequestEventInvitation {
   }
 
   // delete an eventInvitation
-  static Future<HTTPContainer> delete(BigInt id) async {
+  static Future<HTTPContainer> delete(String id) async {
     return await Request.delete(_type, id);
   }
 
   // Update an eventInvitation
-  static Future<HTTPContainer> put(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> put(String id, Map<String, dynamic> data) async {
     return await Request.put(_type, id, data);
   }
 
   // Patch an eventInvitation
-  static Future<HTTPContainer> patch(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> patch(String id, Map<String, dynamic> data) async {
     return await Request.patch(_type, id, data);
   }
 }

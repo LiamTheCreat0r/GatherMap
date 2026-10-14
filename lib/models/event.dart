@@ -4,11 +4,11 @@
 import 'supadart_header.dart';
 
 class Event implements SupadartClass<Event> {
-  final String id;
+  final String? id;
   final String ownerId;
   final DateTime scheduledAt;
   final String location;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final String name;
   final String emojiIcon;
   final String color;

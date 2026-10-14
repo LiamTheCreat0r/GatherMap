@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class Message implements SupadartClass<Message> {
-  final String id;
-  final DateTime createdAt;
+  final String? id;
+  final DateTime? createdAt;
   final String? image;
   final String? content;
   final String senderId;

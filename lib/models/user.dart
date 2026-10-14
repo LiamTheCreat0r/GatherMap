@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class User implements SupadartClass<User> {
-  final String id;
-  final DateTime createdAt;
+  final String? id;
+  final DateTime? createdAt;
   final DateTime birthdate;
   final String username;
   final String name;

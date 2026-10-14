@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class BlockedUser implements SupadartClass<BlockedUser> {
-  final String id;
-  final DateTime blockedAt;
+  final String? id;
+  final DateTime? blockedAt;
   final String blockerId;
   final String blockedId;
 

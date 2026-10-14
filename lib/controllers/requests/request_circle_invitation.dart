@@ -7,7 +7,7 @@ import 'package:gathermap/models/circle_member.dart';
 //Move it to the test file
 void main() async{
   //Test Get
-  Object circle_member = await RequestCircle_Member.get(BigInt.from(5));
+  Object circle_member = await RequestCircle_Member.get("");
   print("Result get ${circle_member.toString()}");
 
   //Test Post
@@ -51,14 +51,14 @@ void main() async{
   // await RequestCircle_Member.patch(circle_memberTestPost.id!,circle_memberTestPost.toJson());
 
   //Test Delete
-  await RequestCircle_Member.delete(BigInt.from(14));
+  await RequestCircle_Member.delete("");
 }
 
 class RequestCircle_Member {
   // URI to circle_member endpoint
   static final TypeObject _type = TypeObject.CIRCLE_MEMBER;
 
-  static Future<Object> get(BigInt? id) async {
+  static Future<Object> get(String? id) async {
     HTTPContainer recuperation = await Request.get(_type,id);
     if(recuperation.getCode()!=200){
       return false;
@@ -72,17 +72,17 @@ class RequestCircle_Member {
   }
 
   // delete an circle_member
-  static Future<HTTPContainer> delete(BigInt id) async {
+  static Future<HTTPContainer> delete(String id) async {
     return await Request.delete(_type, id);
   }
 
   // Update an circle_member
-  static Future<HTTPContainer> put(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> put(String id, Map<String, dynamic> data) async {
     return await Request.put(_type, id, data);
   }
 
   // Patch an circle_member
-  static Future<HTTPContainer> patch(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> patch(String id, Map<String, dynamic> data) async {
     return await Request.patch(_type, id, data);
   }
 }

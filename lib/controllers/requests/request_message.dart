@@ -7,7 +7,7 @@ import 'package:gathermap/models/event_invitation.dart';
 //Move it to the test file
 void main() async{
   //Test Get
-  Object message = await RequestMessage.get(BigInt.from(5));
+  Object message = await RequestMessage.get("");
   print("Result get ${message.toString()}");
 
   //Test Post
@@ -51,14 +51,14 @@ void main() async{
   // await RequestMessage.patch(messageTestPost.id!,messageTestPost.toJson());
 
   //Test Delete
-  await RequestMessage.delete(BigInt.from(14));
+  await RequestMessage.delete("");
 }
 
 class RequestMessage {
   // URI to message endpoint
   static final TypeObject _type = TypeObject.MESSAGE;
 
-  static Future<Object> get(BigInt? id) async {
+  static Future<Object> get(String? id) async {
     HTTPContainer recuperation = await Request.get(_type,id);
     if(recuperation.getCode()!=200){
       return false;
@@ -72,17 +72,17 @@ class RequestMessage {
   }
 
   // delete an message
-  static Future<HTTPContainer> delete(BigInt id) async {
+  static Future<HTTPContainer> delete(String id) async {
     return await Request.delete(_type, id);
   }
 
   // Update an message
-  static Future<HTTPContainer> put(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> put(String id, Map<String, dynamic> data) async {
     return await Request.put(_type, id, data);
   }
 
   // Patch an message
-  static Future<HTTPContainer> patch(BigInt id, Map<String, dynamic> data) async {
+  static Future<HTTPContainer> patch(String id, Map<String, dynamic> data) async {
     return await Request.patch(_type, id, data);
   }
 }

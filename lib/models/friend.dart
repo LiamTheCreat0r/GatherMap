@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class Friend implements SupadartClass<Friend> {
-  final String id;
-  final DateTime friendsSince;
+  final String? id;
+  final DateTime? friendsSince;
   final String userId1;
   final String userId2;
 

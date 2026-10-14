@@ -15,7 +15,7 @@ class Request {
   static Future<HTTPContainer> _requete(
       TypeRequete typeRequete,
       TypeObject typeObjet, {
-        BigInt? id,
+        String? id,
         Map<String, dynamic>? body,
       }) async {
     await RequestAuth.login("email@gougou.com", "mot2passe");
@@ -80,7 +80,7 @@ class Request {
   }
 
   // --- Méthodes Publiques ---
-  static Future<HTTPContainer> get(TypeObject type, BigInt? id) async {
+  static Future<HTTPContainer> get(TypeObject type, String? id) async {
     return _requete(TypeRequete.GET, type, id:id);
   }
 
@@ -88,15 +88,15 @@ class Request {
     return _requete(TypeRequete.POST, type, body: body);
   }
 
-  static Future<HTTPContainer> delete(TypeObject type, BigInt id) async {
+  static Future<HTTPContainer> delete(TypeObject type, String id) async {
     return _requete(TypeRequete.DELETE, type, id: id);
   }
 
-  static Future<HTTPContainer> put(TypeObject type, BigInt id, Map<String, dynamic> body) async {
+  static Future<HTTPContainer> put(TypeObject type, String id, Map<String, dynamic> body) async {
     return _requete(TypeRequete.PUT, type, id: id, body: body);
   }
 
-  static Future<HTTPContainer> patch(TypeObject type, BigInt id, Map<String, dynamic> body) async {
+  static Future<HTTPContainer> patch(TypeObject type, String id, Map<String, dynamic> body) async {
     return _requete(TypeRequete.PATCH, type, id: id, body: body);
   }
 }
