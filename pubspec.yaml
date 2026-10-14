@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-    sdk: 3.13.5
+    sdk: ^3.11.4
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -34,12 +34,16 @@ dependencies:
     # The following adds the Cupertino Icons font to your application.
     # Use with the CupertinoIcons class for iOS style icons.
     cupertino_icons: 2.0.0
+    flutter_svg: ^2.3.0
     google_fonts: 9.0.0
     # 3.0.0-dev prereleases are required by supabase_typegen's output
     # (PostgrestTable, PostgrestColumn, PostgrestDate, …).
     postgrest: 3.0.0-dev.9
     supabase_flutter: 3.0.0-dev.9
     intl: ^0.20.3
+
+   # dependencies for the map
+    maplibre_gl: ^0.27.1
 
 dev_dependencies:
     flutter_test:
@@ -64,8 +68,8 @@ flutter:
     uses-material-design: true
 
     # To add assets to your application, add an assets section, like this:
-    # assets:
-    #   - images/a_dot_burr.jpeg
+    assets:
+        - assets/icons/
     #   - images/a_dot_ham.jpeg
 
     # An image asset can refer to one or more resolution-specific "variants", see

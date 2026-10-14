@@ -4,16 +4,16 @@
 import 'supadart_header.dart';
 
 class EventInvitation implements SupadartClass<EventInvitation> {
-  final BigInt? id;
-  final DateTime? createdAt;
+  final String id;
+  final DateTime createdAt;
   final bool? accepted;
-  final BigInt userId;
-  final BigInt eventId;
+  final String userId;
+  final String eventId;
 
   const EventInvitation({
     required this.id,
     required this.createdAt,
-    required this.accepted,
+    this.accepted,
     required this.userId,
     required this.eventId,
   });
@@ -35,27 +35,27 @@ class EventInvitation implements SupadartClass<EventInvitation> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     bool? accepted,
-    BigInt? userId,
-    BigInt? eventId,
+    String? userId,
+    String? eventId,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      'id': ?id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
       'accepted': ?accepted,
-      if (userId != null) 'user_id': userId.toString(),
-      if (eventId != null) 'event_id': eventId.toString(),
+      'user_id': ?userId,
+      'event_id': ?eventId,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     bool? accepted,
-    required BigInt userId,
-    required BigInt eventId,
+    required String userId,
+    required String eventId,
   }) {
     return _generateMap(
       id: id,
@@ -67,11 +67,11 @@ class EventInvitation implements SupadartClass<EventInvitation> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     bool? accepted,
-    BigInt? userId,
-    BigInt? eventId,
+    String? userId,
+    String? eventId,
   }) {
     return _generateMap(
       id: id,
@@ -84,19 +84,13 @@ class EventInvitation implements SupadartClass<EventInvitation> {
 
   factory EventInvitation.fromJson(Map<String, dynamic> jsonn) {
     return EventInvitation(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),
       accepted: jsonn['accepted'] != null ? jsonn['accepted'] as bool : null,
-      userId: jsonn['user_id'] != null
-          ? BigInt.parse(jsonn['user_id'].toString())
-          : BigInt.from(0),
-      eventId: jsonn['event_id'] != null
-          ? BigInt.parse(jsonn['event_id'].toString())
-          : BigInt.from(0),
+      userId: jsonn['user_id'] != null ? jsonn['user_id'].toString() : '',
+      eventId: jsonn['event_id'] != null ? jsonn['event_id'].toString() : '',
     );
   }
 
