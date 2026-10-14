@@ -4,16 +4,16 @@
 import 'supadart_header.dart';
 
 class BlockedUser implements SupadartClass<BlockedUser> {
-  final BigInt id;
-  final DateTime blockedAt;
+  final BigInt? id;
+  final DateTime? blockedAt;
   final BigInt? blockedUser;
   final BigInt? userWhoBlocked;
 
   const BlockedUser({
     required this.id,
     required this.blockedAt,
-    this.blockedUser,
-    this.userWhoBlocked,
+    required this.blockedUser,
+    required this.userWhoBlocked,
   });
 
   static String get schema_name => 'public';

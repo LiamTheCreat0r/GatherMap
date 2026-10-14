@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class EventInvitation implements SupadartClass<EventInvitation> {
-  final BigInt id;
-  final DateTime createdAt;
+  final BigInt? id;
+  final DateTime? createdAt;
   final bool? accepted;
   final BigInt userId;
   final BigInt eventId;
@@ -13,7 +13,7 @@ class EventInvitation implements SupadartClass<EventInvitation> {
   const EventInvitation({
     required this.id,
     required this.createdAt,
-    this.accepted,
+    required this.accepted,
     required this.userId,
     required this.eventId,
   });

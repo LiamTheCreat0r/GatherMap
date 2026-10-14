@@ -1,6 +1,6 @@
 enum TypeObject {
   EVENT('/event'),
-  FRIENDS('/friend'),
+  FRIEND('/friend'),
   CHAT('/chat'),
   CIRCLE('/circle'),
   EVENT_INVITATION('/event_invitation'),

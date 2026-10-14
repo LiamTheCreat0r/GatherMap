@@ -4,7 +4,7 @@
 import 'supadart_header.dart';
 
 class CircleMember implements SupadartClass<CircleMember> {
-  final BigInt id;
+  final BigInt? id;
   final BigInt userId;
   final BigInt circleId;
   final DateTime? createdAt;

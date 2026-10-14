@@ -4,6 +4,7 @@ import 'package:gathermap/controllers/utils/http_container.dart';
 import 'package:gathermap/controllers/utils/type_object.dart';
 import 'package:gathermap/models/event.dart';
 
+//Move it to the test file
 void main() async{
   //Test Get
   Object event = await RequestEvent.get(BigInt.from(5));

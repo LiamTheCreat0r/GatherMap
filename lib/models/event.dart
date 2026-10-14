@@ -15,7 +15,7 @@ class Event implements SupadartClass<Event> {
   final bool isPublic;
 
   const Event({
-    this.id,
+    required this.id,
     required this.ownerId,
     required this.scheduledAt,
     required this.location,

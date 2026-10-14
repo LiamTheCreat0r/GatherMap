@@ -4,12 +4,16 @@
 import 'supadart_header.dart';
 
 class Chat implements SupadartClass<Chat> {
-  final BigInt id;
+  final BigInt? id;
   final BigInt? circleId;
   final BigInt? eventId;
   final BigInt? friendId;
 
-  const Chat({required this.id, this.circleId, this.eventId, this.friendId});
+  const Chat({
+    required this.id, 
+    required this.circleId, 
+    required this.eventId, 
+    this.friendId});
 
   static String get schema_name => 'public';
   static String get table_name => 'chat';
