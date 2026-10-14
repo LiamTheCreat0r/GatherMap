@@ -12,6 +12,7 @@ class ChatItem {
     required this.lastMessageDate,
     required this.lastMessage,
     required this.lastUser,
+    required this.numberNewMessages,
     required this.emojiIcon,
     required this.chatType,
     this.members = const [],
@@ -28,6 +29,8 @@ class ChatItem {
 
   /// The user who sent the latest message.
   final String lastUser;
+
+  final int numberNewMessages;
 
   /// Emoji displayed as the conversation avatar.
   final String emojiIcon;
@@ -51,6 +54,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(minutes: 8)),
       lastMessage: 'On se retrouve place du Salin ?',
       lastUser: 'Léa',
+      numberNewMessages: 2,
       emojiIcon: '☕',
       chatType: ChatType.circle,
       members: const ['Léa', 'Hugo', 'Inès', 'Thomas'],
@@ -60,6 +64,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(hours: 2)),
       lastMessage: 'J’apporte de quoi grignoter !',
       lastUser: 'Manon',
+      numberNewMessages: 0,
       emojiIcon: '🚲',
       chatType: ChatType.circle,
       members: const ['Manon', 'Yanis', 'Camille'],
@@ -69,6 +74,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(minutes: 24)),
       lastMessage: 'Le soleil est au rendez-vous 🌞',
       lastUser: 'Sarah',
+      numberNewMessages: 3,
       emojiIcon: '🧺',
       chatType: ChatType.event,
       members: const ['Jules', 'Sarah', 'Nina', 'Maxime', 'Lou'],
@@ -78,6 +84,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(days: 1, hours: 3)),
       lastMessage: 'Les fraises étaient délicieuses !',
       lastUser: 'Élodie',
+      numberNewMessages: 0,
       emojiIcon: '🍓',
       chatType: ChatType.event,
       members: const ['Élodie', 'Paul', 'Mila'],
@@ -87,6 +94,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(minutes: 3)),
       lastMessage: 'On prend un café aux Carmes ?',
       lastUser: 'Camille',
+      numberNewMessages: 1,
       emojiIcon: '👋',
       chatType: ChatType.friend,
     ),
@@ -95,6 +103,7 @@ List<ChatItem> _placeholderChats() {
       lastMessageDate: now.subtract(const Duration(hours: 5)),
       lastMessage: 'Je suis près de la place du Capitole',
       lastUser: 'Théo',
+      numberNewMessages: 0,
       emojiIcon: '🙂',
       chatType: ChatType.friend,
     ),
@@ -107,8 +116,8 @@ List<ChatItem> _placeholderChats() {
 /// All colours and text styles come from the [CustomColors] and
 /// [CustomTextStyles] theme extensions, so light and dark mode are handled by
 /// the active theme with no branching here.
-class TestPage3 extends StatelessWidget {
-  const TestPage3({super.key});
+class Chat extends StatelessWidget {
+  const Chat({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -314,35 +323,60 @@ class _ChatIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 50,
-      height: 50,
-      decoration: BoxDecoration(
-        color: colors.translucentSurfaceColor,
-        border: Border.all(color: colors.borderColor, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (chat.chatType == ChatType.friend)
-            ClipRect(
-              child: _ChatAvatar(
-                name: chat.name,
-                index: 0,
-                ringColor: colors.cardColor,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: colors.translucentSurfaceColor,
+            border: Border.all(color: colors.borderColor, width: 1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: chat.chatType == ChatType.friend
+              ? ClipRect(
+                  child: _ChatAvatar(
+                    name: chat.name,
+                    index: 0,
+                    ringColor: colors.cardColor,
+                  ),
+                )
+              : Text(
+                  chat.emojiIcon,
+                  textAlign: TextAlign.center,
+                  style: textStyles.subTitleStyle.copyWith(
+                    color: colors.primaryTextColor,
+                  ),
+                ),
+        ),
+        if (chat.numberNewMessages > 0)
+          Positioned(
+            top: -5,
+            right: -5,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.dangerColor,
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: colors.mainBackgroundColor, width: 2),
               ),
-            )
-          else
-            Text(
-              chat.emojiIcon,
-              textAlign: TextAlign.center,
-              style: textStyles.subTitleStyle.copyWith(
-                color: colors.primaryTextColor,
+              child: Text(
+                chat.numberNewMessages > 99
+                    ? '99+'
+                    : chat.numberNewMessages.toString(),
+                style: textStyles.labelStyle.copyWith(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -360,6 +394,9 @@ class _InfoCard extends StatelessWidget {
   final CustomColors colors;
   final CustomTextStyles textStyles;
 
+  String _formatMessageTime(DateTime date) =>
+      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -371,13 +408,26 @@ class _InfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  chat.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyles.bodyTextStyle.copyWith(
-                    color: colors.primaryTextColor,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        chat.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textStyles.bodyTextStyle.copyWith(
+                          color: colors.primaryTextColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatMessageTime(chat.lastMessageDate),
+                      style: textStyles.labelStyle.copyWith(
+                        color: colors.secondaryTextColor,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 1),
                 Text(
