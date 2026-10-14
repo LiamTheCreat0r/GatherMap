@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/custom_colors.dart';
 import '../core/theme/custom_text_styles.dart';
+import 'widgets/page_header.dart';
 
 /// Minimal event shape used to render the Events list while the real Supabase
 /// fetch is not wired up yet. Named `EventItem` to avoid clashing with the
@@ -158,7 +159,7 @@ class EventsList extends StatelessWidget {
       backgroundColor: colors.mainBackgroundColor,
       body: Column(
         children: [
-          _EventsHeader(colors: colors, textStyles: textStyles),
+          const PageHeader(title: 'Événements'),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -201,40 +202,6 @@ class EventsList extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Orange page header holding the page title.
-class _EventsHeader extends StatelessWidget {
-  const _EventsHeader({required this.colors, required this.textStyles});
-
-  final CustomColors colors;
-  final CustomTextStyles textStyles;
-
-  @override
-  Widget build(BuildContext context) {
-    // Let the orange fill the status bar area, and keep the title clear of the
-    // notch/cutout.
-    final topInset = MediaQuery.of(context).padding.top;
-
-    return ColoredBox(
-      color: colors.accentColor,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: topInset + 12,
-          left: 20,
-          right: 20,
-          bottom: 16,
-        ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Événements',
-            style: textStyles.pageTitleStyle.copyWith(color: Colors.white),
-          ),
-        ),
       ),
     );
   }

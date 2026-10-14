@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class Event implements SupadartClass<Event> {
-  final BigInt id;
-  final BigInt ownerId;
+  final String id;
+  final String ownerId;
   final DateTime scheduledAt;
   final String location;
   final DateTime createdAt;
@@ -47,8 +47,8 @@ class Event implements SupadartClass<Event> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
-    BigInt? ownerId,
+    String? id,
+    String? ownerId,
     DateTime? scheduledAt,
     String? location,
     DateTime? createdAt,
@@ -58,8 +58,8 @@ class Event implements SupadartClass<Event> {
     bool? isPublic,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
-      if (ownerId != null) 'owner_id': ownerId.toString(),
+      'id': ?id,
+      'owner_id': ?ownerId,
       if (scheduledAt != null)
         'scheduled_at': scheduledAt.toUtc().toIso8601String(),
       'location': ?location,
@@ -72,8 +72,8 @@ class Event implements SupadartClass<Event> {
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
-    required BigInt ownerId,
+    String? id,
+    required String ownerId,
     required DateTime scheduledAt,
     required String location,
     DateTime? createdAt,
@@ -96,8 +96,8 @@ class Event implements SupadartClass<Event> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
-    BigInt? ownerId,
+    String? id,
+    String? ownerId,
     DateTime? scheduledAt,
     String? location,
     DateTime? createdAt,
@@ -121,12 +121,8 @@ class Event implements SupadartClass<Event> {
 
   factory Event.fromJson(Map<String, dynamic> jsonn) {
     return Event(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
-      ownerId: jsonn['owner_id'] != null
-          ? BigInt.parse(jsonn['owner_id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
+      ownerId: jsonn['owner_id'] != null ? jsonn['owner_id'].toString() : '',
       scheduledAt: jsonn['scheduled_at'] != null
           ? DateTime.parse(jsonn['scheduled_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),

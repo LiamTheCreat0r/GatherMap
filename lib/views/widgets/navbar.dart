@@ -46,24 +46,35 @@ class Navbar extends StatelessWidget {
     final backgroundColor = colors?.mainBackgroundColor ?? Colors.white;
     final borderColor = colors?.borderColor ?? Colors.transparent;
 
+    // Keep the bar's contents clear of the system navigation bar (the gesture
+    // pill or the taller three-button bar). The app draws edge-to-edge, so
+    // without this the icons sit underneath the system bar — overlapped on
+    // gesture-navigation phones and fully hidden on three-button ones.
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: backgroundColor,
         border: Border(top: BorderSide(color: borderColor, width: 1)),
       ),
-      child: Row(
-        children: [
-          for (var index = 0; index < NavTab.values.length; index++)
-            Expanded(
-              child: _NavTabButton(
-                tab: NavTab.values[index],
-                isActive: index == currentIndex,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
-                onTap: () => onTap(index),
+      // Padding sits inside the DecoratedBox so the background and top border
+      // still fill the area behind the system bar; only the icons move up.
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: Row(
+          children: [
+            for (var index = 0; index < NavTab.values.length; index++)
+              Expanded(
+                child: _NavTabButton(
+                  tab: NavTab.values[index],
+                  isActive: index == currentIndex,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                  onTap: () => onTap(index),
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

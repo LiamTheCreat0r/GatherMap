@@ -4,10 +4,10 @@
 import 'supadart_header.dart';
 
 class Chat implements SupadartClass<Chat> {
-  final BigInt id;
-  final BigInt? circleId;
-  final BigInt? eventId;
-  final BigInt? friendId;
+  final String id;
+  final String? circleId;
+  final String? eventId;
+  final String? friendId;
 
   const Chat({required this.id, this.circleId, this.eventId, this.friendId});
 
@@ -27,24 +27,24 @@ class Chat implements SupadartClass<Chat> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
-    BigInt? circleId,
-    BigInt? eventId,
-    BigInt? friendId,
+    String? id,
+    String? circleId,
+    String? eventId,
+    String? friendId,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
-      if (circleId != null) 'circle_id': circleId.toString(),
-      if (eventId != null) 'event_id': eventId.toString(),
-      if (friendId != null) 'friend_id': friendId.toString(),
+      'id': ?id,
+      'circle_id': ?circleId,
+      'event_id': ?eventId,
+      'friend_id': ?friendId,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
-    BigInt? circleId,
-    BigInt? eventId,
-    BigInt? friendId,
+    String? id,
+    String? circleId,
+    String? eventId,
+    String? friendId,
   }) {
     return _generateMap(
       id: id,
@@ -55,10 +55,10 @@ class Chat implements SupadartClass<Chat> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
-    BigInt? circleId,
-    BigInt? eventId,
-    BigInt? friendId,
+    String? id,
+    String? circleId,
+    String? eventId,
+    String? friendId,
   }) {
     return _generateMap(
       id: id,
@@ -70,17 +70,13 @@ class Chat implements SupadartClass<Chat> {
 
   factory Chat.fromJson(Map<String, dynamic> jsonn) {
     return Chat(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       circleId: jsonn['circle_id'] != null
-          ? BigInt.parse(jsonn['circle_id'].toString())
+          ? jsonn['circle_id'].toString()
           : null,
-      eventId: jsonn['event_id'] != null
-          ? BigInt.parse(jsonn['event_id'].toString())
-          : null,
+      eventId: jsonn['event_id'] != null ? jsonn['event_id'].toString() : null,
       friendId: jsonn['friend_id'] != null
-          ? BigInt.parse(jsonn['friend_id'].toString())
+          ? jsonn['friend_id'].toString()
           : null,
     );
   }
