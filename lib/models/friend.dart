@@ -4,10 +4,10 @@
 import 'supadart_header.dart';
 
 class Friend implements SupadartClass<Friend> {
-  final BigInt id;
+  final String id;
   final DateTime friendsSince;
-  final BigInt userId1;
-  final BigInt userId2;
+  final String userId1;
+  final String userId2;
 
   const Friend({
     required this.id,
@@ -32,25 +32,25 @@ class Friend implements SupadartClass<Friend> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? friendsSince,
-    BigInt? userId1,
-    BigInt? userId2,
+    String? userId1,
+    String? userId2,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      if (id != null) 'id': id,
       if (friendsSince != null)
         'friends_since': friendsSince.toUtc().toIso8601String(),
-      if (userId1 != null) 'user_id_1': userId1.toString(),
-      if (userId2 != null) 'user_id_2': userId2.toString(),
+      if (userId1 != null) 'user_id_1': userId1,
+      if (userId2 != null) 'user_id_2': userId2,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? friendsSince,
-    required BigInt userId1,
-    required BigInt userId2,
+    required String userId1,
+    required String userId2,
   }) {
     return _generateMap(
       id: id,
@@ -61,10 +61,10 @@ class Friend implements SupadartClass<Friend> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? friendsSince,
-    BigInt? userId1,
-    BigInt? userId2,
+    String? userId1,
+    String? userId2,
   }) {
     return _generateMap(
       id: id,
@@ -76,18 +76,12 @@ class Friend implements SupadartClass<Friend> {
 
   factory Friend.fromJson(Map<String, dynamic> jsonn) {
     return Friend(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       friendsSince: jsonn['friends_since'] != null
           ? DateTime.parse(jsonn['friends_since'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),
-      userId1: jsonn['user_id_1'] != null
-          ? BigInt.parse(jsonn['user_id_1'].toString())
-          : BigInt.from(0),
-      userId2: jsonn['user_id_2'] != null
-          ? BigInt.parse(jsonn['user_id_2'].toString())
-          : BigInt.from(0),
+      userId1: jsonn['user_id_1'] != null ? jsonn['user_id_1'].toString() : '',
+      userId2: jsonn['user_id_2'] != null ? jsonn['user_id_2'].toString() : '',
     );
   }
 

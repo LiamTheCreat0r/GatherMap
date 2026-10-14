@@ -4,9 +4,9 @@
 import 'supadart_header.dart';
 
 class CircleMember implements SupadartClass<CircleMember> {
-  final BigInt id;
-  final BigInt userId;
-  final BigInt circleId;
+  final String id;
+  final String userId;
+  final String circleId;
   final DateTime? createdAt;
   final String? userNickname;
 
@@ -35,25 +35,25 @@ class CircleMember implements SupadartClass<CircleMember> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
-    BigInt? userId,
-    BigInt? circleId,
+    String? id,
+    String? userId,
+    String? circleId,
     DateTime? createdAt,
     String? userNickname,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
-      if (userId != null) 'user_id': userId.toString(),
-      if (circleId != null) 'circle_id': circleId.toString(),
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (circleId != null) 'circle_id': circleId,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      'user_nickname': ?userNickname,
+      if (userNickname != null) 'user_nickname': userNickname,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
-    required BigInt userId,
-    required BigInt circleId,
+    String? id,
+    required String userId,
+    required String circleId,
     DateTime? createdAt,
     String? userNickname,
   }) {
@@ -67,9 +67,9 @@ class CircleMember implements SupadartClass<CircleMember> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
-    BigInt? userId,
-    BigInt? circleId,
+    String? id,
+    String? userId,
+    String? circleId,
     DateTime? createdAt,
     String? userNickname,
   }) {
@@ -84,15 +84,9 @@ class CircleMember implements SupadartClass<CircleMember> {
 
   factory CircleMember.fromJson(Map<String, dynamic> jsonn) {
     return CircleMember(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
-      userId: jsonn['user_id'] != null
-          ? BigInt.parse(jsonn['user_id'].toString())
-          : BigInt.from(0),
-      circleId: jsonn['circle_id'] != null
-          ? BigInt.parse(jsonn['circle_id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
+      userId: jsonn['user_id'] != null ? jsonn['user_id'].toString() : '',
+      circleId: jsonn['circle_id'] != null ? jsonn['circle_id'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
           : null,

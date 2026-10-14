@@ -4,7 +4,7 @@
 import 'supadart_header.dart';
 
 class User implements SupadartClass<User> {
-  final BigInt id;
+  final String id;
   final DateTime createdAt;
   final DateTime birthdate;
   final String username;
@@ -53,7 +53,7 @@ class User implements SupadartClass<User> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     DateTime? birthdate,
     String? username,
@@ -66,22 +66,22 @@ class User implements SupadartClass<User> {
     bool? privateAccount,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      if (id != null) 'id': id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
       if (birthdate != null) 'birthdate': birthdate.toIso8601String(),
-      'username': ?username,
-      'name': ?name,
-      'surname': ?surname,
-      'city': ?city,
-      'email': ?email,
-      'hash_password': ?hashPassword,
-      'profile_picture': ?profilePicture,
-      'private_account': ?privateAccount,
+      if (username != null) 'username': username,
+      if (name != null) 'name': name,
+      if (surname != null) 'surname': surname,
+      if (city != null) 'city': city,
+      if (email != null) 'email': email,
+      if (hashPassword != null) 'hash_password': hashPassword,
+      if (profilePicture != null) 'profile_picture': profilePicture,
+      if (privateAccount != null) 'private_account': privateAccount,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     required DateTime birthdate,
     required String username,
@@ -109,7 +109,7 @@ class User implements SupadartClass<User> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     DateTime? birthdate,
     String? username,
@@ -138,9 +138,7 @@ class User implements SupadartClass<User> {
 
   factory User.fromJson(Map<String, dynamic> jsonn) {
     return User(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),

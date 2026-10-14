@@ -1,4 +1,4 @@
-library;
+library models;
 
 export 'circle.dart';
 export 'event.dart';

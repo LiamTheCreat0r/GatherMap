@@ -4,12 +4,12 @@
 import 'supadart_header.dart';
 
 class Message implements SupadartClass<Message> {
-  final BigInt id;
+  final String id;
   final DateTime createdAt;
   final String? image;
   final String? content;
-  final BigInt senderId;
-  final BigInt? chatId;
+  final String senderId;
+  final String chatId;
 
   const Message({
     required this.id,
@@ -17,7 +17,7 @@ class Message implements SupadartClass<Message> {
     this.image,
     this.content,
     required this.senderId,
-    this.chatId,
+    required this.chatId,
   });
 
   static String get schema_name => 'public';
@@ -38,30 +38,30 @@ class Message implements SupadartClass<Message> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     String? image,
     String? content,
-    BigInt? senderId,
-    BigInt? chatId,
+    String? senderId,
+    String? chatId,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      if (id != null) 'id': id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      'image': ?image,
-      'content': ?content,
-      if (senderId != null) 'sender_id': senderId.toString(),
-      if (chatId != null) 'chat_id': chatId.toString(),
+      if (image != null) 'image': image,
+      if (content != null) 'content': content,
+      if (senderId != null) 'sender_id': senderId,
+      if (chatId != null) 'chat_id': chatId,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     String? image,
     String? content,
-    required BigInt senderId,
-    BigInt? chatId,
+    required String senderId,
+    required String chatId,
   }) {
     return _generateMap(
       id: id,
@@ -74,12 +74,12 @@ class Message implements SupadartClass<Message> {
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
     String? image,
     String? content,
-    BigInt? senderId,
-    BigInt? chatId,
+    String? senderId,
+    String? chatId,
   }) {
     return _generateMap(
       id: id,
@@ -93,20 +93,14 @@ class Message implements SupadartClass<Message> {
 
   factory Message.fromJson(Map<String, dynamic> jsonn) {
     return Message(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),
       image: jsonn['image'] != null ? jsonn['image'].toString() : null,
       content: jsonn['content'] != null ? jsonn['content'].toString() : null,
-      senderId: jsonn['sender_id'] != null
-          ? BigInt.parse(jsonn['sender_id'].toString())
-          : BigInt.from(0),
-      chatId: jsonn['chat_id'] != null
-          ? BigInt.parse(jsonn['chat_id'].toString())
-          : null,
+      senderId: jsonn['sender_id'] != null ? jsonn['sender_id'].toString() : '',
+      chatId: jsonn['chat_id'] != null ? jsonn['chat_id'].toString() : '',
     );
   }
 
