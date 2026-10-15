@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/custom_colors.dart';
 import '../core/theme/custom_text_styles.dart';
+import './widgets/page_header.dart';
 
 enum ChatType { circle, event, friend }
 
@@ -139,7 +140,7 @@ class Chat extends StatelessWidget {
       backgroundColor: colors.mainBackgroundColor,
       body: Column(
         children: [
-          _ChatsHeader(colors: colors, textStyles: textStyles),
+          PageHeader(title: 'Messages', leading: null),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -206,40 +207,6 @@ class Chat extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Orange page header holding the page title.
-class _ChatsHeader extends StatelessWidget {
-  const _ChatsHeader({required this.colors, required this.textStyles});
-
-  final CustomColors colors;
-  final CustomTextStyles textStyles;
-
-  @override
-  Widget build(BuildContext context) {
-    // Let the orange fill the status bar area, and keep the title clear of the
-    // notch/cutout.
-    final topInset = MediaQuery.of(context).padding.top;
-
-    return ColoredBox(
-      color: colors.accentColor,
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: topInset + 6,
-          left: 10,
-          right: 10,
-          bottom: 12,
-        ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Messages',
-            style: textStyles.pageTitleStyle.copyWith(color: Colors.white),
-          ),
-        ),
       ),
     );
   }
