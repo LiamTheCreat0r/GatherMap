@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../controllers/event_controller.dart';
 import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
 import '../../models/event.dart';
 import '../../services/address_service.dart';
 
+/// Stand-in owner for events created before an auth/session layer exists.
+///
+/// Replaced by the signed-in user's id once authentication lands.
+const _defaultOwnerId = 'a0000000-0000-0000-0000-000000000001';
+
 /// Opens the create-event window floating over the current screen.
 ///
 /// The window is a rounded card that covers only part of the map behind it;
 /// dismissing it (tap outside, the close button, or a footer action) returns to
-/// the map untouched.
-Future<void> showCreateEventDialog(BuildContext context) {
-  return showDialog<void>(
+/// the map untouched. Resolves with the [Event] that was inserted, or `null`
+/// when the window was dismissed without creating one.
+Future<Event?> showCreateEventDialog(BuildContext context) {
+  return showDialog<Event>(
     context: context,
     barrierDismissible: true,
     builder: (_) => const CreateEventDialog(),
@@ -20,8 +28,9 @@ Future<void> showCreateEventDialog(BuildContext context) {
 
 /// Floating, rounded create-event form shown over the map.
 ///
-/// This is UI scaffolding only: the fields are seeded from a placeholder
-/// [Event] and nothing is saved yet. Colours and text styles come from the
+/// The form starts blank and every field is required: submitting validates
+/// them inline and, when complete, inserts the event through [EventController]
+/// and pops with the created row. Colours and text styles come from the
 /// [CustomColors] and [CustomTextStyles] theme extensions, so light and dark
 /// mode are handled by the active theme with no branching here.
 class CreateEventDialog extends StatefulWidget {
@@ -35,38 +44,28 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
   final _nameController = TextEditingController();
 
   /// Selected event icon; empty means none chosen yet.
-  String _emoji = '🎉';
+  String _emoji = '';
 
   /// Address chosen from the autocomplete (or typed freely).
   String _location = '';
-  late DateTime _scheduledAt;
+
+  /// Chosen date and time; null until the organiser picks one.
+  DateTime? _scheduledAt;
 
   /// New events are private unless the organiser opts into a public one.
   bool _isPublic = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Seed the fields from a throwaway row so the form matches the Event model.
-    // The controller is not involved yet.
-    final seed = Event(
-      id: null,
-      ownerId: '',
-      scheduledAt: DateTime.now().add(const Duration(days: 1)),
-      location: '',
-      createdAt: null,
-      name: '',
-      emojiIcon: '🎉',
-      color: '',
-      isPublic: false,
-    );
+  /// True while the insert is in flight; disables the footer buttons.
+  bool _isSubmitting = false;
 
-    _nameController.text = seed.name;
-    _emoji = seed.emojiIcon;
-    _location = seed.location;
-    _scheduledAt = seed.scheduledAt;
-    _isPublic = seed.isPublic;
-  }
+  /// Per-field validation messages, set on submit and cleared as fields fill.
+  String? _nameError;
+  String? _dateError;
+  String? _locationError;
+  String? _emojiError;
+
+  /// Message shown when the insert itself fails.
+  String? _submitError;
 
   @override
   void dispose() {
@@ -82,43 +81,96 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
       builder: (_) => _EmojiPickerSheet(current: _emoji),
     );
     if (picked == null) return;
-    setState(() => _emoji = picked);
+    setState(() {
+      _emoji = picked;
+      _emojiError = null;
+    });
   }
 
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _scheduledAt,
+      initialDate: _scheduledAt ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
     if (picked == null) return;
     setState(() {
+      final base = _scheduledAt ?? DateTime.now();
       _scheduledAt = DateTime(
         picked.year,
         picked.month,
         picked.day,
-        _scheduledAt.hour,
-        _scheduledAt.minute,
+        base.hour,
+        base.minute,
       );
+      _dateError = null;
     });
   }
 
   Future<void> _pickTime() async {
+    final base = _scheduledAt ?? DateTime.now();
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_scheduledAt),
+      initialTime: TimeOfDay.fromDateTime(base),
     );
     if (picked == null) return;
     setState(() {
       _scheduledAt = DateTime(
-        _scheduledAt.year,
-        _scheduledAt.month,
-        _scheduledAt.day,
+        base.year,
+        base.month,
+        base.day,
         picked.hour,
         picked.minute,
       );
+      _dateError = null;
     });
+  }
+
+  /// Validates the form and, when complete, inserts the event.
+  Future<void> _onCreate() async {
+    final name = _nameController.text.trim();
+    final location = _location.trim();
+
+    final nameMissing = name.isEmpty;
+    final dateMissing = _scheduledAt == null;
+    final locationMissing = location.isEmpty;
+    final emojiMissing = _emoji.isEmpty;
+
+    setState(() {
+      _nameError = nameMissing ? 'Le nom est requis.' : null;
+      _dateError = dateMissing ? 'La date et l\'heure sont requises.' : null;
+      _locationError = locationMissing ? 'Le lieu est requis.' : null;
+      _emojiError = emojiMissing ? 'Choisissez une icône.' : null;
+    });
+
+    if (nameMissing || dateMissing || locationMissing || emojiMissing) return;
+
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+    });
+
+    final controller = context.read<EventController>();
+    final created = await controller.create(
+      ownerId: _defaultOwnerId,
+      scheduledAt: _scheduledAt!,
+      location: location,
+      name: name,
+      emojiIcon: _emoji,
+      isPublic: _isPublic,
+    );
+
+    if (!mounted) return;
+    if (created == null) {
+      setState(() {
+        _isSubmitting = false;
+        _submitError = controller.error ?? 'La création a échoué.';
+      });
+      return;
+    }
+
+    Navigator.pop(context, created);
   }
 
   @override
@@ -174,10 +226,15 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                                 style: textStyles.bodyTextStyle.copyWith(
                                   color: colors.primaryTextColor,
                                 ),
+                                onChanged: (_) {
+                                  if (_nameError != null) {
+                                    setState(() => _nameError = null);
+                                  }
+                                },
                                 decoration: _inputDecoration(
                                   colors,
                                   'Apéro des voisins',
-                                ),
+                                ).copyWith(errorText: _nameError),
                               ),
                             ],
                           ),
@@ -185,10 +242,19 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                         const SizedBox(width: 12),
                         // Small square, bottom-aligned with the name input,
                         // holding the event's emoji icon.
-                        _EmojiField(
-                          emoji: _emoji,
-                          colors: colors,
-                          onTap: _pickEmoji,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _EmojiField(
+                              emoji: _emoji,
+                              colors: colors,
+                              onTap: _pickEmoji,
+                            ),
+                            if (_emojiError != null) ...[
+                              const SizedBox(height: 4),
+                              _FieldError(message: _emojiError!),
+                            ],
+                          ],
                         ),
                       ],
                     ),
@@ -204,7 +270,9 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                         Expanded(
                           child: _PickerField(
                             icon: Icons.calendar_today_outlined,
-                            label: _formatDate(_scheduledAt),
+                            label: _scheduledAt == null
+                                ? 'Date'
+                                : _formatDate(_scheduledAt!),
                             colors: colors,
                             textStyles: textStyles,
                             onTap: _pickDate,
@@ -214,7 +282,9 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                         Expanded(
                           child: _PickerField(
                             icon: Icons.schedule_outlined,
-                            label: _formatTime(_scheduledAt),
+                            label: _scheduledAt == null
+                                ? 'Heure'
+                                : _formatTime(_scheduledAt!),
                             colors: colors,
                             textStyles: textStyles,
                             onTap: _pickTime,
@@ -222,6 +292,10 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                         ),
                       ],
                     ),
+                    if (_dateError != null) ...[
+                      const SizedBox(height: 4),
+                      _FieldError(message: _dateError!),
+                    ],
                     const SizedBox(height: 16),
                     _FieldLabel(
                       label: 'Lieu',
@@ -233,8 +307,17 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                       initialValue: _location,
                       colors: colors,
                       textStyles: textStyles,
-                      onChanged: (value) => _location = value,
+                      onChanged: (value) {
+                        _location = value;
+                        if (_locationError != null) {
+                          setState(() => _locationError = null);
+                        }
+                      },
                     ),
+                    if (_locationError != null) ...[
+                      const SizedBox(height: 4),
+                      _FieldError(message: _locationError!),
+                    ],
                     const SizedBox(height: 12),
                     _PublicToggle(
                       value: _isPublic,
@@ -246,12 +329,17 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                 ),
               ),
             ),
+            if (_submitError != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                child: _FieldError(message: _submitError!),
+              ),
             _Footer(
               colors: colors,
               textStyles: textStyles,
+              isSubmitting: _isSubmitting,
               onCancel: () => Navigator.pop(context),
-              // Not wired to the controller yet: closes the window for now.
-              onCreate: () => Navigator.pop(context),
+              onCreate: _onCreate,
             ),
           ],
         ),
@@ -338,6 +426,24 @@ class _FieldLabel extends StatelessWidget {
     return Text(
       label,
       style: textStyles.labelStyle.copyWith(color: colors.secondaryTextColor),
+    );
+  }
+}
+
+/// Inline validation/error caption shown under a field.
+class _FieldError extends StatelessWidget {
+  const _FieldError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CustomColors>()!;
+    final textStyles = Theme.of(context).extension<CustomTextStyles>()!;
+
+    return Text(
+      message,
+      style: textStyles.labelStyle.copyWith(color: colors.dangerColor),
     );
   }
 }
@@ -738,12 +844,16 @@ class _Footer extends StatelessWidget {
   const _Footer({
     required this.colors,
     required this.textStyles,
+    required this.isSubmitting,
     required this.onCancel,
     required this.onCreate,
   });
 
   final CustomColors colors;
   final CustomTextStyles textStyles;
+
+  /// While true the create button shows a spinner and both buttons are inert.
+  final bool isSubmitting;
   final VoidCallback onCancel;
   final VoidCallback onCreate;
 
@@ -755,7 +865,7 @@ class _Footer extends StatelessWidget {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: onCancel,
+              onPressed: isSubmitting ? null : onCancel,
               style: OutlinedButton.styleFrom(
                 foregroundColor: colors.primaryTextColor,
                 side: BorderSide(color: colors.borderColor, width: 1),
@@ -775,7 +885,7 @@ class _Footer extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: FilledButton(
-              onPressed: onCreate,
+              onPressed: isSubmitting ? null : onCreate,
               style: FilledButton.styleFrom(
                 backgroundColor: colors.accentColor,
                 foregroundColor: Colors.white,
@@ -784,10 +894,21 @@ class _Footer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                'Créer',
-                style: textStyles.actionStyle.copyWith(color: Colors.white),
-              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      'Créer',
+                      style: textStyles.actionStyle.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ],

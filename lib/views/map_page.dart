@@ -42,7 +42,13 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showCreateEventDialog(context),
+        onPressed: () async {
+          final created = await showCreateEventDialog(context);
+          if (!context.mounted || created == null) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Événement créé')),
+          );
+        },
         backgroundColor: colors.accentColor,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
