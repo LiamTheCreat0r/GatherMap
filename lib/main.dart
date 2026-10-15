@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/route.dart';
 import 'core/theme/app_themes.dart';
 import 'views/widgets/nav_bar_shell.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabasePublishableKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  // if (supabaseUrl.isEmpty || supabasePublishableKey.isEmpty) {
+  //   throw StateError(
+  //     'Missing Supabase config. Run with --dart-define-from-file=env.json',
+  //   );
+  // }
+
+  await Supabase.initialize(
+    url: supabaseUrl,
+    publishableKey: supabasePublishableKey,
+  );
   runApp(const MyApp());
 }
 
