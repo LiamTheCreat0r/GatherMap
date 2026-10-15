@@ -50,6 +50,7 @@ dependencies:
 
     # dependencies for the map
     maplibre_gl: ^0.27.1
+    logging: ^1.3.0
 
 dev_dependencies:
     flutter_test:
