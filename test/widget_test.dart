@@ -1,18 +1,54 @@
 // Basic widget tests for the app's navbar shell.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:maplibre_gl/maplibre_gl.dart';
 
 import 'package:gathermap/core/route.dart';
 import 'package:gathermap/main.dart';
 import 'package:gathermap/views/widgets/navbar.dart';
 import 'package:gathermap/views/widgets/nav_bar_shell.dart';
 
+/// A no-op MapLibre platform used while the navbar shell is under test.
+///
+/// [NavBarShell] holds every tab in an [IndexedStack] and only builds a tab
+/// once it has been visited, so `MapLibreMap` is created when a test taps the
+/// Map tab. A real map only initializes its method channel once a platform
+/// view is created, which never happens in widget tests; disposing it then
+/// throws a `LateInitializationError`. Returning an inert widget and skipping
+/// disposal keeps the plugin out of the way without changing production code.
+class _FakeMapLibrePlatform extends MapLibreMethodChannel {
+  @override
+  Widget buildView(
+    Map<String, dynamic> creationParams,
+    OnPlatformViewCreatedCallback onPlatformViewCreated,
+    Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  // The real implementation dereferences the method channel, which is never
+  // initialized without a platform view.
+  @override
+  // ignore: must_call_super
+  void dispose() {}
+}
+
 void main() {
+  final originalCreateInstance = MapLibrePlatform.createInstance;
+
   setUp(() {
     // Each test starts with the bar visible.
     CurrentRoute.name.value = null;
+    // Keep the map plugin from creating (and later disposing) a platform view.
+    MapLibrePlatform.createInstance = () => _FakeMapLibrePlatform();
+  });
+
+  tearDown(() {
+    MapLibrePlatform.createInstance = originalCreateInstance;
   });
 
   testWidgets('App renders navbar with four icon-only tabs',

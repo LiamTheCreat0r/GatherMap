@@ -4,9 +4,9 @@
 import 'supadart_header.dart';
 
 class Circle implements SupadartClass<Circle> {
-  final BigInt id;
+  final String id;
   final DateTime createdAt;
-  final BigInt ownerId;
+  final String ownerId;
 
   const Circle({
     required this.id,
@@ -29,44 +29,40 @@ class Circle implements SupadartClass<Circle> {
   }
 
   static Map<String, dynamic> _generateMap({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
-    BigInt? ownerId,
+    String? ownerId,
   }) {
     return {
-      if (id != null) 'id': id.toString(),
+      'id': ?id,
       if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (ownerId != null) 'owner_id': ownerId.toString(),
+      'owner_id': ?ownerId,
     };
   }
 
   static Map<String, dynamic> insert({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
-    required BigInt ownerId,
+    required String ownerId,
   }) {
     return _generateMap(id: id, createdAt: createdAt, ownerId: ownerId);
   }
 
   static Map<String, dynamic> update({
-    BigInt? id,
+    String? id,
     DateTime? createdAt,
-    BigInt? ownerId,
+    String? ownerId,
   }) {
     return _generateMap(id: id, createdAt: createdAt, ownerId: ownerId);
   }
 
   factory Circle.fromJson(Map<String, dynamic> jsonn) {
     return Circle(
-      id: jsonn['id'] != null
-          ? BigInt.parse(jsonn['id'].toString())
-          : BigInt.from(0),
+      id: jsonn['id'] != null ? jsonn['id'].toString() : '',
       createdAt: jsonn['created_at'] != null
           ? DateTime.parse(jsonn['created_at'].toString())
           : DateTime.fromMillisecondsSinceEpoch(0),
-      ownerId: jsonn['owner_id'] != null
-          ? BigInt.parse(jsonn['owner_id'].toString())
-          : BigInt.from(0),
+      ownerId: jsonn['owner_id'] != null ? jsonn['owner_id'].toString() : '',
     );
   }
 
