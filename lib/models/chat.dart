@@ -4,7 +4,7 @@
 import 'supadart_header.dart';
 
 class Chat implements SupadartClass<Chat> {
-  final String id;
+  final String? id;
   final String? circleId;
   final String? eventId;
   final String? friendId;

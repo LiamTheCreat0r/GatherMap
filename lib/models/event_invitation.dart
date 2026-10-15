@@ -4,8 +4,8 @@
 import 'supadart_header.dart';
 
 class EventInvitation implements SupadartClass<EventInvitation> {
-  final String id;
-  final DateTime createdAt;
+  final String? id;
+  final DateTime? createdAt;
   final bool? accepted;
   final String userId;
   final String eventId;
