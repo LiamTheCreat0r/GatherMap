@@ -34,6 +34,12 @@ class NavBarShell extends StatefulWidget {
 class _NavBarShellState extends State<NavBarShell> {
   int _currentIndex = 0;
 
+  static const List<Widget> _pages = [
+    EventsList(),
+    Map(),
+    TestPage3(),
+    AccountPage(),
+  ];
   /// Tabs that have been shown at least once, and so should be built.
   final Set<int> _visited = {0};
 
