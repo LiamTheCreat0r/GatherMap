@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
 import '../../models/event.dart';
+import '../../services/address_service.dart';
 
 /// Opens the create-event window floating over the current screen.
 ///
@@ -32,12 +33,16 @@ class CreateEventDialog extends StatefulWidget {
 
 class _CreateEventDialogState extends State<CreateEventDialog> {
   final _nameController = TextEditingController();
-  final _locationController = TextEditingController();
 
   /// Selected event icon; empty means none chosen yet.
   String _emoji = '🎉';
+
+  /// Address chosen from the autocomplete (or typed freely).
+  String _location = '';
   late DateTime _scheduledAt;
-  bool _isPublic = true;
+
+  /// New events are private unless the organiser opts into a public one.
+  bool _isPublic = false;
 
   @override
   void initState() {
@@ -53,12 +58,12 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
       name: '',
       emojiIcon: '🎉',
       color: '',
-      isPublic: true,
+      isPublic: false,
     );
 
     _nameController.text = seed.name;
     _emoji = seed.emojiIcon;
-    _locationController.text = seed.location;
+    _location = seed.location;
     _scheduledAt = seed.scheduledAt;
     _isPublic = seed.isPublic;
   }
@@ -66,7 +71,6 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
   @override
   void dispose() {
     _nameController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -225,13 +229,11 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                       colors: colors,
                     ),
                     const SizedBox(height: 6),
-                    TextField(
-                      controller: _locationController,
-                      textCapitalization: TextCapitalization.words,
-                      style: textStyles.bodyTextStyle.copyWith(
-                        color: colors.primaryTextColor,
-                      ),
-                      decoration: _inputDecoration(colors, 'Café de la Gare'),
+                    _AddressField(
+                      initialValue: _location,
+                      colors: colors,
+                      textStyles: textStyles,
+                      onChanged: (value) => _location = value,
                     ),
                     const SizedBox(height: 12),
                     _PublicToggle(
@@ -340,15 +342,157 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
+/// Address input with live autocomplete backed by [AddressService].
+///
+/// Typing triggers a debounced geocoding lookup; tapping a suggestion fills the
+/// field with its full label. Free text is still allowed if the user does not
+/// pick a suggestion.
+class _AddressField extends StatefulWidget {
+  const _AddressField({
+    required this.initialValue,
+    required this.colors,
+    required this.textStyles,
+    required this.onChanged,
+  });
+
+  final String initialValue;
+  final CustomColors colors;
+  final CustomTextStyles textStyles;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_AddressField> createState() => _AddressFieldState();
+}
+
+class _AddressFieldState extends State<_AddressField> {
+  final AddressService _service = AddressService();
+
+  /// Incremented per keystroke; a lookup whose token is stale is discarded.
+  int _queryToken = 0;
+
+  Future<List<AddressSuggestion>> _search(String query) async {
+    final token = ++_queryToken;
+
+    // Debounce so a burst of keystrokes issues a single request.
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (token != _queryToken) return const [];
+
+    try {
+      return await _service.search(query);
+    } on Object {
+      // A failed lookup just shows no suggestions; the user can still type.
+      return const [];
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Autocomplete<AddressSuggestion>(
+      initialValue: TextEditingValue(text: widget.initialValue),
+      optionsBuilder: (value) {
+        final query = value.text.trim();
+        if (query.length < 3) return const <AddressSuggestion>[];
+        return _search(query);
+      },
+      displayStringForOption: (option) => option.placeName,
+      onSelected: (option) => widget.onChanged(option.placeName),
+      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          textCapitalization: TextCapitalization.words,
+          style: widget.textStyles.bodyTextStyle.copyWith(
+            color: widget.colors.primaryTextColor,
+          ),
+          decoration: _inputDecoration(
+            widget.colors,
+            'Café de la Gare',
+          ).copyWith(
+            prefixIcon: Icon(
+              Icons.search,
+              size: 18,
+              color: widget.colors.secondaryTextColor,
+            ),
+          ),
+          onChanged: widget.onChanged,
+          onSubmitted: (_) => onFieldSubmitted(),
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            color: widget.colors.cardColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: widget.colors.borderColor, width: 1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 220, maxWidth: 380),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () => onSelected(option),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      child: Text(
+                        option.placeName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: widget.textStyles.bodyTextStyle.copyWith(
+                          color: widget.colors.primaryTextColor,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// Curated set of event/party emojis offered by the picker.
 ///
 /// Kept small and hand-picked so the grid stays on-theme and needs no extra
 /// dependency or search UI.
 const List<String> _eventEmojis = [
-  '🎉', '🍻', '🎂', '🍕', '🍽️', '☕',
-  '🎵', '🎸', '🎮', '🎳', '🎨', '🎬',
-  '⚽', '🏀', '🚴', '🏖️', '🌳', '🏕️',
-  '📸', '🎯', '🍿', '🥂', '🏠', '🚀',
+  '🎉',
+  '🍻',
+  '🎂',
+  '🍕',
+  '🍽️',
+  '☕',
+  '🎵',
+  '🎸',
+  '🎮',
+  '🎳',
+  '🎨',
+  '🎬',
+  '⚽',
+  '🏀',
+  '🚴',
+  '🏖️',
+  '🌳',
+  '🏕️',
+  '📸',
+  '🎯',
+  '🍿',
+  '🥂',
+  '🏠',
+  '🚀',
 ];
 
 /// Tappable 52px square showing the event's icon; opens the emoji grid.
