@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gathermap/views/account_page.dart';
 import 'package:gathermap/views/chat.dart';
 
 import '../../core/route.dart';
 import '../events_list.dart';
 import '../map_page.dart';
-import '../test_page_4.dart';
 import 'navbar.dart';
 
 /// Hosts the four tab pages and the bottom navigation bar.
@@ -34,12 +34,6 @@ class NavBarShell extends StatefulWidget {
 class _NavBarShellState extends State<NavBarShell> {
   int _currentIndex = 0;
 
-  static const List<Widget> _pages = [
-    EventsList(),
-    Map(),
-    TestPage3(),
-    AccountPage(),
-  ];
   /// Tabs that have been shown at least once, and so should be built.
   final Set<int> _visited = {0};
 
@@ -59,7 +53,7 @@ class _NavBarShellState extends State<NavBarShell> {
     const EventsList(),
     _visited.contains(1) ? const MapPage() : const SizedBox.shrink(),
     _visited.contains(2) ? const Chat() : const SizedBox.shrink(),
-    _visited.contains(3) ? const TestPage4() : const SizedBox.shrink(),
+    _visited.contains(3) ? const AccountPage() : const SizedBox.shrink(),
   ];
 
   @override

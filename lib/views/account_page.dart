@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../core/theme/custom_colors.dart';
-import '../core/theme/custom_text_styles.dart';
 import './widgets/page_header.dart';
 
 class AccountPage extends StatelessWidget {
@@ -9,7 +8,6 @@ class AccountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CustomColors>()!;
-    final textStyles = Theme.of(context).extension<CustomTextStyles>()!;
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
