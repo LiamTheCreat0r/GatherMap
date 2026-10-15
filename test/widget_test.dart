@@ -14,12 +14,12 @@ import 'package:gathermap/views/widgets/nav_bar_shell.dart';
 
 /// A no-op MapLibre platform used while the navbar shell is under test.
 ///
-/// [NavBarShell] keeps every tab alive in an [IndexedStack], so the Map tab —
-/// and therefore [MapLibreMap] — is built even in tests that never touch it.
-/// A real map only initializes its method channel once a platform view is
-/// created, which never happens in widget tests; disposing it then throws a
-/// `LateInitializationError`. Returning an inert widget and skipping disposal
-/// keeps the plugin out of the way without changing production code.
+/// [NavBarShell] holds every tab in an [IndexedStack] and only builds a tab
+/// once it has been visited, so `MapLibreMap` is created when a test taps the
+/// Map tab. A real map only initializes its method channel once a platform
+/// view is created, which never happens in widget tests; disposing it then
+/// throws a `LateInitializationError`. Returning an inert widget and skipping
+/// disposal keeps the plugin out of the way without changing production code.
 class _FakeMapLibrePlatform extends MapLibreMethodChannel {
   @override
   Widget buildView(
