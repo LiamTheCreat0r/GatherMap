@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'controllers/controllers.dart';
 import 'core/route.dart';
 import 'core/theme/app_themes.dart';
 import 'views/widgets/nav_bar_shell.dart';
@@ -28,20 +30,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: AppThemes.themeModeValue,
-      builder: (context, mode, _) {
-        return MaterialApp(
-          title: 'GatherMap',
-          debugShowCheckedModeBanner: false,
-          theme: AppThemes.lightTheme,
-          darkTheme: AppThemes.darkTheme,
-          themeMode: mode,
-          navigatorObservers: [currentRouteObserver],
-          onGenerateRoute: _onGenerateRoute,
-          home: const NavBarShell(),
-        );
-      },
+    return MultiProvider(
+      // One ChangeNotifier per table. `create` is lazy: a controller is only
+      // built when a widget first reads it, so nothing touches Supabase at
+      // startup.
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserController()),
+        ChangeNotifierProvider(create: (_) => EventController()),
+        ChangeNotifierProvider(create: (_) => EventInvitationController()),
+        ChangeNotifierProvider(create: (_) => CircleController()),
+        ChangeNotifierProvider(create: (_) => CircleMemberController()),
+        ChangeNotifierProvider(create: (_) => ChatController()),
+        ChangeNotifierProvider(create: (_) => MessageController()),
+        ChangeNotifierProvider(create: (_) => FriendController()),
+        ChangeNotifierProvider(create: (_) => BlockedUserController()),
+      ],
+      child: ValueListenableBuilder<ThemeMode>(
+        valueListenable: AppThemes.themeModeValue,
+        builder: (context, mode, _) {
+          return MaterialApp(
+            title: 'GatherMap',
+            debugShowCheckedModeBanner: false,
+            theme: AppThemes.lightTheme,
+            darkTheme: AppThemes.darkTheme,
+            themeMode: mode,
+            navigatorObservers: [currentRouteObserver],
+            onGenerateRoute: _onGenerateRoute,
+            home: const NavBarShell(),
+          );
+        },
+      ),
     );
   }
 }

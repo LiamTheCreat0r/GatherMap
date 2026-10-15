@@ -42,6 +42,9 @@ dependencies:
     supabase_flutter: 3.0.0-dev.9
     intl: ^0.20.3
 
+    # state management for the controller layer (lib/controllers/)
+    provider: ^6.1.5
+
     # dependencies for the map
     maplibre_gl: ^0.27.1
 
