@@ -14,14 +14,13 @@ class AppRoutes {
   static const String profile = '/profile';
 
   // Detail routes — the bottom navigation is hidden on these.
-  static const String eventCreate = '/events/new';
   static const String eventDetail = '/events/:id';
 
   /// Route name patterns where the bottom navigation must be hidden.
   ///
   /// Add a pattern here (for example `'/settings/edit'`) and the navigation
   /// bar will automatically disappear while that route is on top.
-  static const List<String> hiddenNavRoutes = [eventCreate, eventDetail];
+  static const List<String> hiddenNavRoutes = [eventDetail];
 
   /// Returns true when the bottom navigation should be hidden for [name].
   static bool isNavHidden(String? name) {

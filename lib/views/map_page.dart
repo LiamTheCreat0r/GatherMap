@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../core/route.dart';
 import '../core/theme/custom_colors.dart';
+import 'widgets/create_event_dialog.dart';
 import 'widgets/map_widget.dart';
 import 'widgets/page_header.dart';
 import 'widgets/visibility_toggle.dart';
@@ -10,9 +10,9 @@ import 'widgets/visibility_toggle.dart';
 ///
 /// The header carries a [VisibilityToggle] that switches the map between
 /// friends-only and public events, and a floating action button opens the
-/// create-event screen. Colours come from the [CustomColors] theme extension,
-/// so light and dark mode are handled by the active theme with no branching
-/// here.
+/// create-event window over the map. Colours come from the [CustomColors]
+/// theme extension, so light and dark mode are handled by the active theme
+/// with no branching here.
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -42,8 +42,7 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () =>
-            Navigator.pushNamed(context, AppRoutes.eventCreate),
+        onPressed: () => showCreateEventDialog(context),
         backgroundColor: colors.accentColor,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),

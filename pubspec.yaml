@@ -45,6 +45,9 @@ dependencies:
     # state management for the controller layer (lib/controllers/)
     provider: ^6.1.5
 
+    # HTTP client used by the address geocoding service
+    http: ^1.6.0
+
     # dependencies for the map
     maplibre_gl: ^0.27.1
 
