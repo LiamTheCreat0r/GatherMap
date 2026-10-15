@@ -32,9 +32,10 @@ class CreateEventDialog extends StatefulWidget {
 
 class _CreateEventDialogState extends State<CreateEventDialog> {
   final _nameController = TextEditingController();
-  final _emojiController = TextEditingController();
   final _locationController = TextEditingController();
 
+  /// Selected event icon; empty means none chosen yet.
+  String _emoji = '🎉';
   late DateTime _scheduledAt;
   bool _isPublic = true;
 
@@ -56,7 +57,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
     );
 
     _nameController.text = seed.name;
-    _emojiController.text = seed.emojiIcon;
+    _emoji = seed.emojiIcon;
     _locationController.text = seed.location;
     _scheduledAt = seed.scheduledAt;
     _isPublic = seed.isPublic;
@@ -65,9 +66,19 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
   @override
   void dispose() {
     _nameController.dispose();
-    _emojiController.dispose();
     _locationController.dispose();
     super.dispose();
+  }
+
+  /// Opens the emoji grid and stores the picked icon, if any.
+  Future<void> _pickEmoji() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EmojiPickerSheet(current: _emoji),
+    );
+    if (picked == null) return;
+    setState(() => _emoji = picked);
   }
 
   Future<void> _pickDate() async {
@@ -113,7 +124,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
 
     // Keep the window clear of the screen edges so the map stays visible behind
     // it, and cap its height so long content scrolls instead of filling up.
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.7;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.85;
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -139,34 +150,43 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FieldLabel(
-                      label: 'Nom',
-                      textStyles: textStyles,
-                      colors: colors,
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _nameController,
-                      textCapitalization: TextCapitalization.sentences,
-                      style: textStyles.bodyTextStyle.copyWith(
-                        color: colors.primaryTextColor,
-                      ),
-                      decoration: _inputDecoration(colors, 'Apéro des voisins'),
-                    ),
-                    const SizedBox(height: 16),
-                    _FieldLabel(
-                      label: 'Emoji',
-                      textStyles: textStyles,
-                      colors: colors,
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _emojiController,
-                      textAlign: TextAlign.center,
-                      style: textStyles.bodyTextStyle.copyWith(
-                        color: colors.primaryTextColor,
-                      ),
-                      decoration: _inputDecoration(colors, '🎉'),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _FieldLabel(
+                                label: 'Nom',
+                                textStyles: textStyles,
+                                colors: colors,
+                              ),
+                              const SizedBox(height: 6),
+                              TextField(
+                                controller: _nameController,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                style: textStyles.bodyTextStyle.copyWith(
+                                  color: colors.primaryTextColor,
+                                ),
+                                decoration: _inputDecoration(
+                                  colors,
+                                  'Apéro des voisins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Small square, bottom-aligned with the name input,
+                        // holding the event's emoji icon.
+                        _EmojiField(
+                          emoji: _emoji,
+                          colors: colors,
+                          onTap: _pickEmoji,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     _FieldLabel(
@@ -316,6 +336,164 @@ class _FieldLabel extends StatelessWidget {
     return Text(
       label,
       style: textStyles.labelStyle.copyWith(color: colors.secondaryTextColor),
+    );
+  }
+}
+
+/// Curated set of event/party emojis offered by the picker.
+///
+/// Kept small and hand-picked so the grid stays on-theme and needs no extra
+/// dependency or search UI.
+const List<String> _eventEmojis = [
+  '🎉', '🍻', '🎂', '🍕', '🍽️', '☕',
+  '🎵', '🎸', '🎮', '🎳', '🎨', '🎬',
+  '⚽', '🏀', '🚴', '🏖️', '🌳', '🏕️',
+  '📸', '🎯', '🍿', '🥂', '🏠', '🚀',
+];
+
+/// Tappable 52px square showing the event's icon; opens the emoji grid.
+class _EmojiField extends StatelessWidget {
+  const _EmojiField({
+    required this.emoji,
+    required this.colors,
+    required this.onTap,
+  });
+
+  /// Currently selected emoji, or an empty string for none.
+  final String emoji;
+  final CustomColors colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Choisir une icône',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 52,
+          height: 52,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colors.secondarySurfaceColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.borderColor, width: 1),
+          ),
+          child: emoji.isEmpty
+              ? Icon(
+                  Icons.emoji_emotions_outlined,
+                  size: 22,
+                  color: colors.secondaryTextColor,
+                )
+              : Text(emoji, style: const TextStyle(fontSize: 22, height: 1.2)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Rounded bottom sheet holding the [_eventEmojis] grid.
+///
+/// Pops with the tapped emoji, or `null` when dismissed.
+class _EmojiPickerSheet extends StatelessWidget {
+  const _EmojiPickerSheet({required this.current});
+
+  /// Currently selected emoji, highlighted in the grid.
+  final String current;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CustomColors>()!;
+    final textStyles = Theme.of(context).extension<CustomTextStyles>()!;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: colors.borderColor, width: 1)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Choisir une icône',
+              style: textStyles.subTitleStyle.copyWith(
+                color: colors.primaryTextColor,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: GridView.count(
+                crossAxisCount: 6,
+                shrinkWrap: true,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                children: [
+                  for (final emoji in _eventEmojis)
+                    _EmojiTile(
+                      emoji: emoji,
+                      isSelected: emoji == current,
+                      colors: colors,
+                      onTap: () => Navigator.pop(context, emoji),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One emoji cell: a rounded tile that highlights the current selection.
+class _EmojiTile extends StatelessWidget {
+  const _EmojiTile({
+    required this.emoji,
+    required this.isSelected,
+    required this.colors,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final bool isSelected;
+  final CustomColors colors;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: colors.secondarySurfaceColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? colors.accentColor : colors.borderColor,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(emoji, style: const TextStyle(fontSize: 22, height: 1.2)),
+      ),
     );
   }
 }
@@ -474,24 +652,11 @@ class _Footer extends StatelessWidget {
   }
 }
 
-/// French month names, indexed by `DateTime.month - 1`.
-const List<String> _monthsFrLong = [
-  'janvier',
-  'février',
-  'mars',
-  'avril',
-  'mai',
-  'juin',
-  'juillet',
-  'août',
-  'septembre',
-  'octobre',
-  'novembre',
-  'décembre',
-];
-
+/// Short French date, e.g. `16/10/2026`.
 String _formatDate(DateTime date) =>
-    '${date.day} ${_monthsFrLong[date.month - 1]} ${date.year}';
+    '${date.day.toString().padLeft(2, '0')}/'
+    '${date.month.toString().padLeft(2, '0')}/'
+    '${date.year}';
 
 String _formatTime(DateTime date) =>
     '${date.hour.toString().padLeft(2, '0')}h${date.minute.toString().padLeft(2, '0')}';
