@@ -93,15 +93,21 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap the Map tab (index 1).
+    // LoadingDots animates forever under the fake map platform (the style
+    // never loads), so pumpAndSettle would never quiesce while that tab is
+    // alive. Pump a bounded number of frames instead.
     await tester.tap(find.byType(SvgPicture).at(1));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     final navbar = tester.widget<Navbar>(find.byType(Navbar));
     expect(navbar.currentIndex, 1);
 
-    // Tap the Profile tab (index 3).
+    // Tap the Profile tab (index 3). The map tab stays mounted in the
+    // IndexedStack, so bounded pumps again.
     await tester.tap(find.byType(SvgPicture).at(3));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(tester.widget<Navbar>(find.byType(Navbar)).currentIndex, 3);
   });
