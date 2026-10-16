@@ -2,7 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gathermap/controllers/event_controller.dart';
 import 'package:gathermap/models/event.dart';
 
-Event _event(String id, DateTime scheduledAt) => Event(
+Event _event(
+  String id,
+  DateTime scheduledAt, {
+  double? latitude,
+  double? longitude,
+}) => Event(
   id: id,
   ownerId: 'owner-1',
   scheduledAt: scheduledAt,
@@ -12,6 +17,8 @@ Event _event(String id, DateTime scheduledAt) => Event(
   emojiIcon: '🎉',
   color: '#FF5A1F',
   isPublic: true,
+  latitude: latitude,
+  longitude: longitude,
 );
 
 void main() {

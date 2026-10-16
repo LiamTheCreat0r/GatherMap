@@ -49,6 +49,12 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
   /// Address chosen from the autocomplete (or typed freely).
   String _location = '';
 
+  /// Coordinates of the chosen address, from the geocoder. Null when the
+  /// location was typed freely (no suggestion picked) — such events are
+  /// created without a map position and simply aren't pinned.
+  double? _latitude;
+  double? _longitude;
+
   /// Chosen date and time; null until the organiser picks one.
   DateTime? _scheduledAt;
 
@@ -159,6 +165,8 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
       name: name,
       emojiIcon: _emoji,
       isPublic: _isPublic,
+      latitude: _latitude,
+      longitude: _longitude,
     );
 
     if (!mounted) return;
@@ -308,7 +316,19 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                       colors: colors,
                       textStyles: textStyles,
                       onChanged: (value) {
+                        // Free typing invalidates any previously picked
+                        // coordinates: the new text has no known position.
                         _location = value;
+                        _latitude = null;
+                        _longitude = null;
+                        if (_locationError != null) {
+                          setState(() => _locationError = null);
+                        }
+                      },
+                      onSuggestionSelected: (suggestion) {
+                        _location = suggestion.placeName;
+                        _latitude = suggestion.latitude;
+                        _longitude = suggestion.longitude;
                         if (_locationError != null) {
                           setState(() => _locationError = null);
                         }
@@ -459,12 +479,19 @@ class _AddressField extends StatefulWidget {
     required this.colors,
     required this.textStyles,
     required this.onChanged,
+    required this.onSuggestionSelected,
   });
 
   final String initialValue;
   final CustomColors colors;
   final CustomTextStyles textStyles;
+
+  /// Fires on free typing, with just the raw text — no coordinates.
   final ValueChanged<String> onChanged;
+
+  /// Fires when the user picks a geocoded suggestion, carrying its label and
+  /// coordinates.
+  final ValueChanged<AddressSuggestion> onSuggestionSelected;
 
   @override
   State<_AddressField> createState() => _AddressFieldState();
@@ -501,7 +528,10 @@ class _AddressFieldState extends State<_AddressField> {
         return _search(query);
       },
       displayStringForOption: (option) => option.placeName,
-      onSelected: (option) => widget.onChanged(option.placeName),
+      onSelected: (option) {
+        widget.onChanged(option.placeName);
+        widget.onSuggestionSelected(option);
+      },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
           controller: controller,

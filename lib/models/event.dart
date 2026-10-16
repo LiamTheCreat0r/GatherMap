@@ -13,6 +13,8 @@ class Event implements SupadartClass<Event> {
   final String emojiIcon;
   final String color;
   final bool isPublic;
+  final double? latitude;
+  final double? longitude;
 
   const Event({
     required this.id,
@@ -24,6 +26,8 @@ class Event implements SupadartClass<Event> {
     required this.emojiIcon,
     required this.color,
     required this.isPublic,
+    required this.latitude,
+    required this.longitude,
   });
 
   static String get schema_name => 'public';
@@ -37,6 +41,8 @@ class Event implements SupadartClass<Event> {
   static String get c_emojiIcon => 'emoji_icon';
   static String get c_color => 'color';
   static String get c_isPublic => 'is_public';
+  static String get c_latitude => 'latitude';
+  static String get c_longitude => 'longitude';
 
   static List<Event> converter(List<Map<String, dynamic>> data) {
     return data.map(Event.fromJson).toList();
@@ -56,6 +62,8 @@ class Event implements SupadartClass<Event> {
     String? emojiIcon,
     String? color,
     bool? isPublic,
+    double? latitude,
+    double? longitude,
   }) {
     return {
       'id': ?id,
@@ -68,6 +76,8 @@ class Event implements SupadartClass<Event> {
       'emoji_icon': ?emojiIcon,
       'color': ?color,
       'is_public': ?isPublic,
+      'latitude': ?latitude,
+      'longitude': ?longitude,
     };
   }
 
@@ -81,6 +91,8 @@ class Event implements SupadartClass<Event> {
     required String emojiIcon,
     String? color,
     required bool isPublic,
+    double? latitude,
+    double? longitude,
   }) {
     return _generateMap(
       id: id,
@@ -92,6 +104,8 @@ class Event implements SupadartClass<Event> {
       emojiIcon: emojiIcon,
       color: color,
       isPublic: isPublic,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 
@@ -105,6 +119,8 @@ class Event implements SupadartClass<Event> {
     String? emojiIcon,
     String? color,
     bool? isPublic,
+    double? latitude,
+    double? longitude,
   }) {
     return _generateMap(
       id: id,
@@ -116,6 +132,8 @@ class Event implements SupadartClass<Event> {
       emojiIcon: emojiIcon,
       color: color,
       isPublic: isPublic,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 
@@ -136,6 +154,12 @@ class Event implements SupadartClass<Event> {
           : '',
       color: jsonn['color'] != null ? jsonn['color'].toString() : '',
       isPublic: jsonn['is_public'] != null ? jsonn['is_public'] as bool : false,
+      latitude: jsonn['latitude'] != null
+          ? (jsonn['latitude'] as num).toDouble()
+          : null,
+      longitude: jsonn['longitude'] != null
+          ? (jsonn['longitude'] as num).toDouble()
+          : null,
     );
   }
 
@@ -150,6 +174,8 @@ class Event implements SupadartClass<Event> {
       emojiIcon: emojiIcon,
       color: color,
       isPublic: isPublic,
+      latitude: latitude,
+      longitude: longitude,
     );
   }
 }

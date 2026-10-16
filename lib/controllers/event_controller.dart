@@ -65,6 +65,8 @@ class EventController extends BaseController {
     required String emojiIcon,
     String? color,
     required bool isPublic,
+    double? latitude,
+    double? longitude,
   }) => runQuery<Event?>(() async {
     final rows = await client.event
         .insert(
@@ -76,6 +78,8 @@ class EventController extends BaseController {
             emojiIcon: emojiIcon,
             color: color,
             isPublic: isPublic,
+            latitude: latitude,
+            longitude: longitude,
           ),
         )
         .select();
