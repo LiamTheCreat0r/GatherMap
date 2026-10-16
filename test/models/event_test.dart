@@ -26,6 +26,28 @@ void main() {
       expect(payload.containsKey('id'), isFalse);
       expect(payload.containsKey('created_at'), isFalse);
       expect(payload.containsKey('color'), isFalse);
+      // Coordinates are absent when null, so free-typed locations are left
+      // unpinned rather than stored as a bogus (0, 0) position.
+      expect(payload.containsKey('latitude'), isFalse);
+      expect(payload.containsKey('longitude'), isFalse);
+    });
+
+    test('insert carries coordinates when the location was geocoded', () {
+      final scheduledAt = DateTime(2026, 10, 17, 18, 30);
+
+      final payload = Event.insert(
+        ownerId: 'owner-1',
+        scheduledAt: scheduledAt,
+        location: 'Café de la Gare',
+        name: 'Apéro des voisins',
+        emojiIcon: '🥂',
+        isPublic: true,
+        latitude: 43.6045,
+        longitude: 1.4442,
+      );
+
+      expect(payload['latitude'], 43.6045);
+      expect(payload['longitude'], 1.4442);
     });
 
     test('update omits untouched fields but keeps explicit false', () {
@@ -53,6 +75,39 @@ void main() {
       expect(event.scheduledAt, DateTime.parse('2026-10-17T16:30:00+00:00'));
       expect(event.isPublic, isFalse);
       expect(Event.converter([event.toJson()]), hasLength(1));
+    });
+
+    test('fromJson reads coordinates and tolerates their absence', () {
+      final pinned = Event.fromJson({
+        'id': 'e-2',
+        'owner_id': 'owner-1',
+        'scheduled_at': '2026-10-17T16:30:00+00:00',
+        'location': 'Parc de Sceaux',
+        'name': 'Randonnée',
+        'emoji_icon': '🌄',
+        'is_public': false,
+        // PostgREST returns doubles, which may decode as whole numbers.
+        'latitude': 48.7761,
+        'longitude': 2.2963,
+      });
+
+      expect(pinned.latitude, closeTo(48.7761, 1e-9));
+      expect(pinned.longitude, closeTo(2.2963, 1e-9));
+
+      final unpinned = Event.fromJson({
+        'id': 'e-3',
+        'owner_id': 'owner-1',
+        'scheduled_at': '2026-10-17T16:30:00+00:00',
+        'location': 'Some typed address',
+        'name': 'Randonnée',
+        'emoji_icon': '🌄',
+        'is_public': false,
+        'latitude': null,
+        'longitude': null,
+      });
+
+      expect(unpinned.latitude, isNull);
+      expect(unpinned.longitude, isNull);
     });
   });
 }
