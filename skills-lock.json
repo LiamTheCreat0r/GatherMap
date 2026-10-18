@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-agent-skills": {
+      "source": "zero-labsco/zero-skills",
+      "sourceType": "github",
+      "skillPath": "skills/flutter-agent-skills/SKILL.md",
+      "computedHash": "67e249dc8668714a7936f2db26ad9203988d3607e7c72e6fe5214e6e31446f52"
+    }
+  }
+}
