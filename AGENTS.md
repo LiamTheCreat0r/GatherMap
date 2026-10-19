@@ -1,42 +1,60 @@
 # GatherMap — Agent Guide
 
-Flutter app (Dart SDK `^3.11.4`, Flutter stable) backed by Supabase.
-Feature-level layers: `lib/models/` (rows) → `lib/controllers/` (state) → `lib/views/`.
+Flutter app (Dart SDK `^3.11.4`, Flutter stable) backed by Supabase, organised
+**feature-first with a clean-architecture core**:
+
+```
+lib/
+├── main.dart          bootstrap only: Supabase.initialize → runApp
+├── app/               MyApp, provider scope wiring, nav shell
+├── core/              cross-feature code: state, error, di, routing, theme, widgets
+├── data/supabase/     the Supabase client wrapper
+├── models/            Supadart output (generated — never hand-edit)
+└── features/<name>/   data/ → domain/ ← presentation/
+```
+
+Dependency rule inside a feature: `presentation → domain ← data`. Only
+`data/` imports Supabase or `lib/models/`; `domain/` is plain Dart and
+`presentation/` talks to repository interfaces.
 
 ## Commands
 
 - `flutter pub get` — install deps.
 - `flutter analyze` — must be clean; CI gate.
 - `flutter test` — full suite (no `.env` or Supabase needed; tests never call the network).
-- Single file: `flutter test test/controllers/event_controller_test.dart`
+- Single file: `flutter test test/features/events/presentation/event_controller_test.dart`
 - Single test: `flutter test --plain-name "an event exactly at [now] counts as past"`
 - Run the app: `flutter run --dart-define-from-file=.env`. Config is compile-time via `String.fromEnvironment` in `lib/main.dart`, so it must be passed at build/run time. `.env` is gitignored; it holds `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
 - CI (`.github/workflows/dart.yml`, `main` branch): `flutter pub get` → `flutter analyze` → `flutter test`. The `dart format` check is present but commented out.
 
 ## Architecture notes
 
-- Layer glue is `lib/services/supabase_service.dart`: controllers take an injectable `SupabaseService` (`controllers({super.service})`) so tests can pass a client. The default resolves `Supabase.instance.client` lazily — **never touch Supabase at construction time** (asserted by `test/controllers/controllers_smoke_test.dart`).
-- Every controller extends `BaseController` (`lib/controllers/base_controller.dart`, a `ChangeNotifier`). Use `runAction` for writes, `runQuery` for reads, `watchTable` for realtime. These **never throw** — failures land in `status`/`error` (rendered via `describeError`).
-- All controllers are wired as lazy `ChangeNotifierProvider`s in `lib/main.dart`; one per table.
-- Row access uses extension getters on the client (`client.event`, `client.user`, …) from `lib/models/supadart_header.dart`. Controllers import that header explicitly.
-- `lib/controllers/controllers.dart` deliberately does **not** re-export models — it avoids the generated `User` clashing with `supabase_flutter`'s auth `User`. Import `package:gathermap/models/<table>.dart` directly for row types.
-- UI shell: `NavBarShell` hosts the four tabs in an `IndexedStack` and builds each tab only once visited (starting MapLibre on launch would ANR). Detail routes in `AppRoutes.hiddenNavRoutes` hide the bottom bar through `CurrentRoute`.
+- **Dependency wiring lives in `lib/core/di/providers.dart`.** `AppDependencies` builds the concrete repositories; `buildProviderScope()` wraps the app in the `MultiProvider`. This is the only place that chooses an implementation. Constructing the graph performs no I/O — the `SupabaseService` resolves its client on first query — so **never touch Supabase at construction time** (asserted by `test/app/providers_test.dart`).
+- **Every controller extends `BaseController`** (`lib/core/state/base_controller.dart`, a `ChangeNotifier`). Use `runAction` for writes, `runQuery` for reads, `watchTable` for realtime. These **never throw** — failures land in `status`/`error`, rendered via `describeError` from `lib/core/error/describe_error.dart`.
+- **Only the events feature is fully layered** (`domain/` + `data/` + `presentation/`). The other features (`chats`, `circles`, `friends`, `profile`) currently hold just a controller in `presentation/`, ported verbatim from the old MVC layout; they still query Supabase directly and should be migrated to the events shape when their UI is wired.
+- **Generated row types never cross into `presentation/`.** `features/events/data/event_mapper.dart` is the single bridge to `lib/models/event.dart`; a schema regen can only ripple through the mapper.
+- Row access uses extension getters on the client (`client.event`, `client.user`, …) from `lib/models/supadart_header.dart`. Data sources import that header explicitly.
+- UI shell: `lib/app/shell/nav_bar_shell.dart` hosts the four tabs in an `IndexedStack` and builds each tab only once visited (starting MapLibre on launch would ANR). Detail routes in `AppRoutes.hiddenNavRoutes` hide the bottom bar through `CurrentRoute`.
+- The Events and Messages tabs still render hard-coded placeholder models (`EventItem`, `ChatItem`); only the map and the create-event dialog are wired to a real controller.
 
 ## Generated code & Supabase
 
-- `lib/models/*.dart` are generated by the **Supadart** CLI from the linked project schema (files carry a "auto-generated by Supadart" header); config is `supadart.yaml`. **Do not hand-edit them** — regenerate with `supadart` (needs `SUPABASE_URL` + a *secret* `SUPABASE_API_KEY`).
+- `lib/models/*.dart` are generated by the **Supadart** CLI from the linked project schema (files carry a "auto-generated by Supadart" header); config is `supadart.yaml`, which still outputs to `lib/models/`. **Do not hand-edit them** — regenerate with `supadart` (needs `SUPABASE_URL` + a *secret* `SUPABASE_API_KEY`).
 - The README "Dart type generation" section points at `tool/gen_types.sh` and a `.githooks` pre-commit hook — **neither path exists in this repo** (verified). Ignore those instructions; use the `supadart` section at the end of the README.
 - `supabase/` is **gitignored** (linked project config + `migrations/*.sql`), so schema/migration changes will not be committed. There is no `supabase/seed.sql` despite the README.
 - Keep `supabase_flutter` and `postgrest` pinned to the `3.0.0-dev.9` prereleases in `pubspec.yaml`; the generated model output depends on them.
 
 ## Testing quirks
 
-- Controller tests use hand-written fakes; no mockito/mocktail, no live DB. Feed state directly where a setter is marked `@visibleForTesting`.
+- Controller tests use hand-written fakes; no mockito/mocktail, no live DB. `EventController` tests pass a `_FakeEventRepository` implementing the domain interface, so they never touch Supabase.
+- Feed state directly where a setter is marked `@visibleForTesting`.
 - Widget tests that mount the app must stub the map plugin by replacing `MapLibrePlatform.createInstance` with a fake `MapLibreMethodChannel` (see `test/widget_test.dart`); otherwise disposal throws `LateInitializationError`.
 - `pumpAndSettle()` never quiesces while the Map tab is mounted (`LoadingDots` animates forever under the fake platform) — use bounded `pump(...)` there.
+- `CreateEventDialog` takes an optional `AddressService`, so the geocoder can be stubbed instead of hitting MapTiler.
 
 ## Conventions
 
 - `STYLE_GUIDE.md` governs naming (files `snake_case`, classes `PascalCase`, members `camelCase`) and git: commits `Feat-(Description)` / `Fix-(Description)` / `Doc-(Description)`; branches `create-` / `update-` / `patch-`.
 - Lints come from `flutter_lints` via `analysis_options.yaml`; `build/` and platform dirs (`android/`, `ios/`, `web/`, …) are excluded from analysis.
-- `lib/logs.dart` wraps `package:logging`; `lib/core/theme/` exposes colors/text styles as `ThemeExtension`s read through the `context.colors` / `context.textStyles` getters.
+- `lib/core/logging/logs.dart` wraps `package:logging`; `lib/core/theme/` exposes colors/text styles as `ThemeExtension`s read through the `context.colors` / `context.textStyles` getters.
+- Shared presentation widgets (`SectionTitle`, `Avatar`, `AvatarRow`, `PageHeader`, `LoadingDots`) live in `lib/core/widgets/`; feature-specific ones stay under `features/<name>/presentation/widgets/`.
