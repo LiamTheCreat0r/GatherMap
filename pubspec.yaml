@@ -52,6 +52,10 @@ dependencies:
     maplibre_gl: ^0.27.1
     logging: ^1.3.0
 
+    # cross-platform device location (Android, iOS, web). Handles the runtime
+    # permission prompts behind the map's "locate me" button.
+    geolocator: ^14.1.1
+
 dev_dependencies:
     flutter_test:
         sdk: flutter

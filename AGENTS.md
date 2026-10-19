@@ -16,6 +16,7 @@ Feature-level layers: `lib/models/` (rows) → `lib/controllers/` (state) → `l
 ## Architecture notes
 
 - Layer glue is `lib/services/supabase_service.dart`: controllers take an injectable `SupabaseService` (`controllers({super.service})`) so tests can pass a client. The default resolves `Supabase.instance.client` lazily — **never touch Supabase at construction time** (asserted by `test/controllers/controllers_smoke_test.dart`).
+- Device location lives in `lib/services/location_service.dart`: a `LocationProvider` seam over `geolocator` (hand-written fakes in tests) plus a `LocationService.locate()` that never throws and folds denials into a `LocationResult`. The map's "locate me" button uses it. Android declares `ACCESS_FINE/COARSE_LOCATION` and iOS the `NSLocationWhenInUseUsageDescription` key; the browser prompts on its own (web needs HTTPS/localhost).
 - Every controller extends `BaseController` (`lib/controllers/base_controller.dart`, a `ChangeNotifier`). Use `runAction` for writes, `runQuery` for reads, `watchTable` for realtime. These **never throw** — failures land in `status`/`error` (rendered via `describeError`).
 - All controllers are wired as lazy `ChangeNotifierProvider`s in `lib/main.dart`; one per table.
 - Row access uses extension getters on the client (`client.event`, `client.user`, …) from `lib/models/supadart_header.dart`. Controllers import that header explicitly.
