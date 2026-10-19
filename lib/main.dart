@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'controllers/controllers.dart';
 import 'core/route.dart';
 import 'core/theme/app_themes.dart';
-import 'views/widgets/nav_bar_shell.dart';
+import 'views/auth/auth_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,21 +32,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      // One ChangeNotifier per table. `create` is lazy: a controller is only
-      // built when a widget first reads it, so nothing touches Supabase at
-      // startup.
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserController()),
-        ChangeNotifierProvider(create: (_) => EventController()),
-        ChangeNotifierProvider(create: (_) => EventInvitationController()),
-        ChangeNotifierProvider(create: (_) => CircleController()),
-        ChangeNotifierProvider(create: (_) => CircleMemberController()),
-        ChangeNotifierProvider(create: (_) => ChatController()),
-        ChangeNotifierProvider(create: (_) => MessageController()),
-        ChangeNotifierProvider(create: (_) => FriendController()),
-        ChangeNotifierProvider(create: (_) => BlockedUserController()),
-      ],
+    return AppProviders(
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: AppThemes.themeModeValue,
         builder: (context, mode, _) {
@@ -57,8 +43,8 @@ class MyApp extends StatelessWidget {
             darkTheme: AppThemes.darkTheme,
             themeMode: mode,
             navigatorObservers: [currentRouteObserver],
-            onGenerateRoute: _onGenerateRoute,
-            home: const NavBarShell(),
+            onGenerateRoute: AppRoutes.onGenerateRoute,
+            home: const AuthGate(),
           );
         },
       ),
@@ -66,31 +52,43 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Handles the named routes declared in [AppRoutes].
+/// Wires every controller into the widget tree.
 ///
-/// Only the nav-hiding detail routes are wired up for now; the four tab pages
-/// are hosted directly by [NavBarShell] and are not pushed as routes. The
-/// create-event window is not a route — it is shown over the map rather than
-/// pushed onto the navigator.
-Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
-  if (AppRoutes.isNavHidden(settings.name)) {
-    return MaterialPageRoute<void>(
-      settings: settings,
-      builder: (_) => const _EventDetailPlaceholder(),
-    );
-  }
-  return null;
-}
+/// `create` is lazy: a controller is only built when a widget first reads it, so
+/// nothing touches Supabase at startup — the session is restored later, by
+/// `AuthGate` calling [AuthController.initialize].
+///
+/// Separate from [MyApp] so a widget test can host a single screen on the same
+/// controllers without going through the gate.
+class AppProviders extends StatelessWidget {
+  const AppProviders({super.key, required this.child});
 
-/// Stand-in for the real event detail screen.
-///
-/// Its only job right now is to prove that pushing a detail route hides the
-/// bottom navigation bar, and popping it brings the bar back.
-class _EventDetailPlaceholder extends StatelessWidget {
-  const _EventDetailPlaceholder();
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Event details')));
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthController()),
+
+        // One controller per table. The profile cache is not per-table: it
+        // follows the session, so it is a proxy over AuthController —
+        // `syncSession` loads the row on a sign-in and clears it on a sign-out.
+        ChangeNotifierProxyProvider<AuthController, ProfileController>(
+          create: (_) => ProfileController(),
+          update: (_, auth, profile) => profile!..syncSession(auth.userId),
+        ),
+
+        ChangeNotifierProvider(create: (_) => EventController()),
+        ChangeNotifierProvider(create: (_) => EventInvitationController()),
+        ChangeNotifierProvider(create: (_) => CircleController()),
+        ChangeNotifierProvider(create: (_) => CircleMemberController()),
+        ChangeNotifierProvider(create: (_) => ChatController()),
+        ChangeNotifierProvider(create: (_) => MessageController()),
+        ChangeNotifierProvider(create: (_) => FriendController()),
+        ChangeNotifierProvider(create: (_) => BlockedUserController()),
+      ],
+      child: child,
+    );
   }
 }

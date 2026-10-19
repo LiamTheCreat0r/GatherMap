@@ -1,4 +1,9 @@
-// Basic widget tests for the app's navbar shell.
+// Basic widget tests for the app's navigation shell.
+//
+// The shell is hosted directly on `AppProviders` rather than through `MyApp`:
+// these tests are about the tab bar, and going through the gate would mean
+// stubbing a session first. Everything else — providers, routes, theme — is the
+// same wiring the app uses, so the shell under test is the real one.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -8,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import 'package:gathermap/core/route.dart';
+import 'package:gathermap/core/theme/app_themes.dart';
 import 'package:gathermap/main.dart';
 import 'package:gathermap/views/widgets/navbar.dart';
 import 'package:gathermap/views/widgets/nav_bar_shell.dart';
@@ -37,6 +43,18 @@ class _FakeMapLibrePlatform extends MapLibreMethodChannel {
   void dispose() {}
 }
 
+/// The signed-in app: the tab shell on the app's own controller wiring.
+Widget _shell() {
+  return AppProviders(
+    child: MaterialApp(
+      theme: AppThemes.lightTheme,
+      navigatorObservers: [currentRouteObserver],
+      onGenerateRoute: AppRoutes.onGenerateRoute,
+      home: const NavBarShell(),
+    ),
+  );
+}
+
 void main() {
   final originalCreateInstance = MapLibrePlatform.createInstance;
 
@@ -51,9 +69,10 @@ void main() {
     MapLibrePlatform.createInstance = originalCreateInstance;
   });
 
-  testWidgets('App renders navbar with four icon-only tabs',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App renders navbar with four icon-only tabs', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_shell());
     await tester.pumpAndSettle();
 
     expect(find.byType(Navbar), findsOneWidget);
@@ -67,29 +86,39 @@ void main() {
     }
   });
 
-  testWidgets('Active tab is orange and inactive tabs are warm gray',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Active tab is orange and inactive tabs are warm gray', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_shell());
     await tester.pumpAndSettle();
 
-    final pictures = tester.widgetList<SvgPicture>(find.byType(SvgPicture)).toList();
+    final pictures = tester
+        .widgetList<SvgPicture>(find.byType(SvgPicture))
+        .toList();
 
     final activeFilter = pictures.first.colorFilter;
     final inactiveFilter = pictures.last.colorFilter;
 
     expect(
       activeFilter,
-      const ColorFilter.mode(Color.fromARGB(255, 242, 100, 25), BlendMode.srcIn),
+      const ColorFilter.mode(
+        Color.fromARGB(255, 242, 100, 25),
+        BlendMode.srcIn,
+      ),
     );
     expect(
       inactiveFilter,
       const ColorFilter.mode(
-          Color.fromARGB(255, 154, 143, 131), BlendMode.srcIn),
+        Color.fromARGB(255, 154, 143, 131),
+        BlendMode.srcIn,
+      ),
     );
   });
 
-  testWidgets('Tapping a tab changes the active index', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Tapping a tab changes the active index', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_shell());
     await tester.pumpAndSettle();
 
     // Tap the Map tab (index 1).
@@ -104,7 +133,9 @@ void main() {
     expect(navbar.currentIndex, 1);
 
     // Tap the Profile tab (index 3). The map tab stays mounted in the
-    // IndexedStack, so bounded pumps again.
+    // IndexedStack, so bounded pumps again. The account page reads the
+    // signed-in profile, which this harness does not provide: it renders the
+    // empty state, which is what this test is not about.
     await tester.tap(find.byType(SvgPicture).at(3));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -112,9 +143,10 @@ void main() {
     expect(tester.widget<Navbar>(find.byType(Navbar)).currentIndex, 3);
   });
 
-  testWidgets('Detail route hides the navbar, popping restores it',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Detail route hides the navbar, popping restores it', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_shell());
     await tester.pumpAndSettle();
 
     expect(find.byType(Navbar), findsOneWidget);
@@ -134,9 +166,10 @@ void main() {
     expect(find.byType(Navbar), findsOneWidget);
   });
 
-  testWidgets('Navbar spans the full width as a short bar at the bottom',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Navbar spans the full width as a short bar at the bottom', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(_shell());
     await tester.pumpAndSettle();
 
     final box = tester.renderObject<RenderBox>(find.byType(Navbar));
@@ -155,12 +188,12 @@ void main() {
 
     // The four icons sit at the centre of four equal quarters, so their
     // centres are evenly spaced by a quarter of the bar width.
-    final centers = tester
-        .widgetList<SvgPicture>(find.byType(SvgPicture))
-        .map((picture) =>
-            tester.getCenter(find.byWidget(picture)).dx)
-        .toList()
-      ..sort();
+    final centers =
+        tester
+            .widgetList<SvgPicture>(find.byType(SvgPicture))
+            .map((picture) => tester.getCenter(find.byWidget(picture)).dx)
+            .toList()
+          ..sort();
 
     final spacing = screen.width / NavTab.values.length;
     for (var i = 1; i < centers.length; i++) {

@@ -8,4 +8,4 @@ export 'chat.dart';
 export 'friend.dart';
 export 'blocked_user.dart';
 export 'message.dart';
-export 'user.dart';
+export 'profile.dart';

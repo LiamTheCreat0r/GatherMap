@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../controllers/auth_controller.dart';
 import '../../controllers/event_controller.dart';
 import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
 import '../../models/event.dart';
 import '../../services/address_service.dart';
-
-/// Stand-in owner for events created before an auth/session layer exists.
-///
-/// Replaced by the signed-in user's id once authentication lands.
-const _defaultOwnerId = 'a0000000-0000-0000-0000-000000000001';
 
 /// Opens the create-event window floating over the current screen.
 ///
@@ -158,8 +154,20 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
     });
 
     final controller = context.read<EventController>();
+    // The organiser is whoever is signed in; the `event_insert_own` policy
+    // refuses any other value. Reaching this dialog at all means the gate found
+    // a session, so the id is present.
+    final ownerId = context.read<AuthController>().userId;
+    if (ownerId == null) {
+      setState(() {
+        _isSubmitting = false;
+        _submitError = 'Session expirée, reconnectez-vous.';
+      });
+      return;
+    }
+
     final created = await controller.create(
-      ownerId: _defaultOwnerId,
+      ownerId: ownerId,
       scheduledAt: _scheduledAt!,
       location: location,
       name: name,

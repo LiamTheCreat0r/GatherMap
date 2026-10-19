@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/profile_controller.dart';
 import '../core/theme/custom_colors.dart';
+import '../models/profile.dart';
 import './widgets/page_header.dart';
 
 class AccountPage extends StatefulWidget {
@@ -17,6 +21,8 @@ class _AccountPageState extends State<AccountPage> {
     final colors = Theme.of(context).extension<CustomColors>()!;
     // Couleur d'accentuation principale (orange de votre thème ou fallback)
     final primaryColor = Theme.of(context).primaryColor;
+    final profile = context.watch<ProfileController>().current;
+    final email = context.watch<AuthController>().email;
 
     return Scaffold(
       backgroundColor: colors.mainBackgroundColor,
@@ -34,9 +40,9 @@ class _AccountPageState extends State<AccountPage> {
                         radius: 36,
                         backgroundColor:
                             primaryColor, // Utilise la couleur d'accentuation orange
-                        child: const Text(
-                          'YO',
-                          style: TextStyle(
+                        child: Text(
+                          _initialsFor(profile),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -48,9 +54,9 @@ class _AccountPageState extends State<AccountPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Moi',
-                              style: TextStyle(
+                            Text(
+                              _displayNameFor(profile),
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -58,12 +64,22 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '@moi · Toulouse',
+                              _subtitleFor(profile),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[400],
                               ),
                             ),
+                            if (email != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                email,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -165,7 +181,7 @@ class _AccountPageState extends State<AccountPage> {
                     title: 'Se déconnecter',
                     textColor: const Color(0xFFE53935),
                     showChevron: false,
-                    onTap: () {},
+                    onTap: () => context.read<AuthController>().signOut(),
                   ),
                 ],
               ),
@@ -240,4 +256,40 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
+}
+
+/// Avatar text: the initials of the name, or the first letter of the username
+/// when the profile has no name yet.
+String _initialsFor(Profile? profile) {
+  final name = profile?.name.trim() ?? '';
+  final surname = profile?.surname.trim() ?? '';
+  final initials =
+      '${name.isEmpty ? '' : name[0]}${surname.isEmpty ? '' : surname[0]}'
+          .toUpperCase();
+  if (initials.isNotEmpty) return initials;
+
+  final username = profile?.username ?? '';
+  return username.isEmpty ? '?' : username[0].toUpperCase();
+}
+
+/// "Prénom Nom", falling back to the username and then to a neutral label.
+String _displayNameFor(Profile? profile) {
+  final full = [profile?.name ?? '', profile?.surname ?? '']
+      .where((part) => part.trim().isNotEmpty)
+      .join(' ')
+      .trim();
+  if (full.isNotEmpty) return full;
+
+  final username = profile?.username ?? '';
+  return username.isEmpty ? 'Mon profil' : '@$username';
+}
+
+/// "@pseudo · Ville", dropping whichever half is missing.
+String _subtitleFor(Profile? profile) {
+  final username = profile?.username ?? '';
+  final city = profile?.city ?? '';
+  return [
+    if (username.isNotEmpty) '@$username',
+    if (city.isNotEmpty) city,
+  ].join(' · ');
 }

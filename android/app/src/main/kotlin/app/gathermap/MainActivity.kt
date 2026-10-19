@@ -1,4 +1,4 @@
-package com.example.gathermap
+package app.gathermap
 
 import io.flutter.embedding.android.FlutterActivity
 

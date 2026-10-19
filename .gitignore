@@ -49,4 +49,7 @@ app.*.map.json
 # Widget Preview related
 .widget_preview/
 
-supabase/
+# The linked project's local config (.temp, config.toml) is machine specific,
+# but the migrations are the schema's history and must be committed.
+supabase/*
+!supabase/migrations/

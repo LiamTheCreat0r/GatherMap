@@ -43,7 +43,7 @@ extension SupadartClient on SupabaseClient {
   SupabaseQueryBuilder get friend => from('friend');
   SupabaseQueryBuilder get blocked_user => from('blocked_user');
   SupabaseQueryBuilder get message => from('message');
-  SupabaseQueryBuilder get user => from('user');
+  SupabaseQueryBuilder get profile => from('profiles');
 }
 
 // Supabase Storage Client Extension
