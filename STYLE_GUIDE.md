@@ -9,9 +9,8 @@
 ## Branchs
 |Goal|Name|
 |-----|-----|
-|adding a feature|create-(description)|
-|updating a feature|update-(description)|
-|patching a bug|patch-(description)|
+|adding a feature|feat-(description)|
+|updating a feature|fix-(description)|
 
 # Code
 ## Formatting
