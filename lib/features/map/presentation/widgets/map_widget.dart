@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/custom_colors.dart';
 import '../../../../core/theme/custom_text_styles.dart';
 import '../../../../core/widgets/loading_dots.dart';
+import '../../../../services/location_service.dart';
 import '../../../events/domain/event.dart';
 import '../../../events/presentation/event_controller.dart';
 import 'event_pin.dart';
@@ -16,6 +17,12 @@ const String _eventsSourceId = 'event-pins';
 
 /// Symbol layer drawing those points with the rendered pin images.
 const String _eventsLayerId = 'event-pins-layer';
+
+/// GeoJSON source holding the device's last known position, once located.
+const String _userLocationSourceId = 'user-location';
+
+/// Circle layer drawing that position as an accent-coloured dot.
+const String _userLocationLayerId = 'user-location-layer';
 
 /// Map tab.
 ///
@@ -35,8 +42,18 @@ const String _eventsLayerId = 'event-pins-layer';
 /// Until the style is ready the map is covered by a [LoadingDots] overlay so
 /// the user sees the app's loader instead of a blank platform view. The
 /// overlay fades out once the style (and the pin images) are in place.
+///
+/// A floating "locate me" button sits over the map. Tapping it asks for the
+/// device's position through [LocationService] — which raises the platform's
+/// permission prompt — then centres the camera on the fix and marks it with an
+/// accent-coloured dot. Denials and disabled services surface as a snack bar
+/// with a shortcut to the relevant settings.
 class Map extends StatefulWidget {
-  const Map({super.key});
+  const Map({super.key, this.locationService = const LocationService()});
+
+  /// Resolves the device's position (with permission) for the locate button.
+  /// Injectable so tests can supply a fake provider.
+  final LocationService locationService;
 
   @override
   State<Map> createState() => _MapState();
@@ -61,6 +78,13 @@ class _MapState extends State<Map> {
   /// True while a pin sync is in flight, so overlapping triggers (style load
   /// + an event refresh landing together) queue into one pass.
   bool _syncing = false;
+
+  /// Latest device position, drawn as an accent dot. Null until a locate
+  /// succeeds.
+  LatLng? _userLocation;
+
+  /// True while a locate is in flight; the button shows a spinner.
+  bool _isLocating = false;
 
   /// Latest theme values captured during build, so the async sync can render
   /// pin bitmaps without touching `Theme.of` outside the build phase.
@@ -114,8 +138,27 @@ class _MapState extends State<Map> {
     // The tab can be closed while those platform calls are in flight; a
     // disposed map must not be handed more work.
     if (!mounted || controller != _controller) return;
+    await controller.addGeoJsonSource(
+      _userLocationSourceId,
+      _emptyFeatureCollection,
+    );
+    await controller.addCircleLayer(
+      _userLocationSourceId,
+      _userLocationLayerId,
+      CircleLayerProperties(
+        // A dot the size of a fingertip, ringed in white so it stays legible
+        // over any basemap.
+        circleRadius: 7,
+        circleColor: _hexColor(_colors?.accentColor ?? const Color(0xFFF26419)),
+        circleStrokeWidth: 3,
+        circleStrokeColor: '#FFFFFF',
+        circleOpacity: 0.95,
+      ),
+    );
+    if (!mounted || controller != _controller) return;
     await _syncPinsToMap();
     await _fitToPins();
+    await _syncUserLocationToMap();
   }
 
   // Typed by inference: this class is itself named `Map`, so an explicit
@@ -245,6 +288,79 @@ class _MapState extends State<Map> {
     );
   }
 
+  /// Pushes the stored device fix into its GeoJSON source, if the style is
+  /// ready. Safe to call before a fix exists or before the style loads.
+  Future<void> _syncUserLocationToMap() async {
+    final controller = _controller;
+    final location = _userLocation;
+    if (controller == null || location == null || !_isStyleLoaded) return;
+
+    await controller.setGeoJsonSource(_userLocationSourceId, {
+      'type': 'FeatureCollection',
+      'features': [
+        {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Point',
+            'coordinates': [location.longitude, location.latitude],
+          },
+        },
+      ],
+    });
+  }
+
+  /// Asks for the device's position — prompting for permission — then centres
+  /// the camera on the fix and marks it.
+  Future<void> _locateUser() async {
+    if (_isLocating) return;
+    setState(() => _isLocating = true);
+
+    final result = await widget.locationService.locate();
+    if (!mounted) return;
+    setState(() => _isLocating = false);
+
+    final location = result.location;
+    if (location == null) {
+      _showLocationFailure(result.failure!);
+      return;
+    }
+
+    final target = LatLng(location.latitude, location.longitude);
+    setState(() => _userLocation = target);
+    await _syncUserLocationToMap();
+
+    final controller = _controller;
+    if (controller == null || !_isStyleLoaded) return;
+    await controller.animateCamera(
+      CameraUpdate.newLatLngZoom(target, 15),
+      duration: const Duration(milliseconds: 600),
+    );
+  }
+
+  /// Explains why a locate failed, with a shortcut to the settings that can
+  /// unblock it.
+  void _showLocationFailure(LocationFailure failure) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(_locationFailureMessage(failure)),
+        action: switch (failure) {
+          LocationFailure.serviceDisabled => SnackBarAction(
+            label: 'Paramètres',
+            onPressed: () => widget.locationService.openLocationSettings(),
+          ),
+          LocationFailure.permissionDeniedForever => SnackBarAction(
+            label: 'Paramètres',
+            onPressed: () => widget.locationService.openAppSettings(),
+          ),
+          LocationFailure.permissionDenied ||
+          LocationFailure.unavailable => null,
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CustomColors>()!;
@@ -305,7 +421,86 @@ class _MapState extends State<Map> {
             ),
           ),
         ),
+        // Locate control. Sits above the loading overlay so it stays tappable
+        // from the first frame.
+        Positioned(
+          top: 16,
+          right: 16,
+          child: _LocateButton(
+            isLoading: _isLocating,
+            colors: colors,
+            onPressed: _locateUser,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+/// `#RRGGBB` for a MapLibre style colour, dropping the alpha channel.
+String _hexColor(Color color) {
+  final rgb = color.toARGB32() & 0xFFFFFF;
+  return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+}
+
+/// User-facing explanation for a failed locate.
+String _locationFailureMessage(LocationFailure failure) => switch (failure) {
+  LocationFailure.serviceDisabled =>
+    'Activez la localisation de votre appareil pour vous situer sur la carte.',
+  LocationFailure.permissionDenied => 'Autorisation de localisation refusée.',
+  LocationFailure.permissionDeniedForever =>
+    'Autorisation refusée. Activez-la dans les paramètres.',
+  LocationFailure.unavailable =>
+    'Impossible de récupérer votre position pour le moment.',
+};
+
+/// Circular, tappable "locate me" control floating over the map.
+///
+/// Shows a spinner in place of the crosshair while a fix is in flight, and is
+/// inert in that state so a second tap cannot start a parallel lookup.
+class _LocateButton extends StatelessWidget {
+  const _LocateButton({
+    required this.isLoading,
+    required this.colors,
+    required this.onPressed,
+  });
+
+  final bool isLoading;
+  final CustomColors colors;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Ma position',
+      child: Material(
+        color: colors.cardColor,
+        elevation: 3,
+        shape: CircleBorder(
+          side: BorderSide(color: colors.borderColor, width: 1),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: isLoading ? null : onPressed,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: isLoading
+                ? Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.accentColor,
+                    ),
+                  )
+                : Icon(
+                    Icons.my_location,
+                    size: 22,
+                    color: colors.accentColor,
+                  ),
+          ),
+        ),
+      ),
     );
   }
 }

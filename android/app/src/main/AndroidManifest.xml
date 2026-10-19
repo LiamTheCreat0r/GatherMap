@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The locate button reads the device's position. The geolocator plugin
+         raises the runtime prompt; these declare the permissions it asks for. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="gathermap"
         android:name="${applicationName}"
