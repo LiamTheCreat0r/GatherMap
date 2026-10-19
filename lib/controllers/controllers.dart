@@ -12,7 +12,6 @@ export 'blocked_user_controller.dart';
 export 'circle_controller.dart';
 export 'circle_member_controller.dart';
 export 'chat_controller.dart';
-export 'event_controller.dart';
 export 'event_invitation_controller.dart';
 export 'friend_controller.dart';
 export 'message_controller.dart';

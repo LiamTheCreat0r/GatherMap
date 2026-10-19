@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/event_controller.dart';
+import '../../features/events/presentation/event_controller.dart';
 import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
 import '../../models/event.dart';

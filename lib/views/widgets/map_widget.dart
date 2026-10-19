@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/event_controller.dart';
 import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
-import '../../models/event.dart';
-import 'event_pin.dart';
 import '../../core/widgets/loading_dots.dart';
+import '../../features/events/domain/event.dart';
+import '../../features/events/presentation/event_controller.dart';
+import 'event_pin.dart';
 
 /// GeoJSON source holding every pinned event as a point feature.
 const String _eventsSourceId = 'event-pins';
@@ -127,14 +127,8 @@ class _MapState extends State<Map> {
 
   /// Events that can actually be pinned: they carry coordinates and an id to
   /// key their image by.
-  List<Event> get _pinnableEvents => _events
-      .where(
-        (event) =>
-            event.latitude != null &&
-            event.longitude != null &&
-            (event.id?.isNotEmpty ?? false),
-      )
-      .toList();
+  List<Event> get _pinnableEvents =>
+      _events.where((event) => event.isPinnable).toList();
 
   /// Renders each pinnable event's pin to a PNG, uploads it as a style image,
   /// and points the GeoJSON source at the matching features.

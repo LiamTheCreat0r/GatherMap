@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/supabase/supabase_service.dart';
 import '../error/describe_error.dart';
 
-/// Lifecycle shared by every controller in `lib/controllers/`.
+/// Lifecycle shared by every controller in the app.
 ///
 /// [ControllerStatus.idle] → [ControllerStatus.loading] →
 /// [ControllerStatus.ready] or [ControllerStatus.error].
@@ -32,7 +32,7 @@ abstract class BaseController extends ChangeNotifier {
   ControllerStatus _status = ControllerStatus.idle;
   String? _error;
   bool _disposed = false;
-  StreamSubscription<SupabaseStreamEvent>? _watchSubscription;
+  StreamSubscription<Object?>? _watchSubscription;
 
   /// The Supabase client every query runs against.
   SupabaseClient get client => _service.client;
@@ -101,9 +101,9 @@ abstract class BaseController extends ChangeNotifier {
   /// notifying listeners. Realtime failures land in [error] without losing
   /// the rows already received.
   @protected
-  void watchTable(
-    Stream<SupabaseStreamEvent> stream, {
-    required void Function(List<Map<String, dynamic>> rows) onData,
+  void watchTable<T>(
+    Stream<T> stream, {
+    required void Function(T rows) onData,
   }) {
     stopWatch();
     _watchSubscription = stream.listen(

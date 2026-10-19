@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../controllers/controllers.dart';
+import '../core/di/providers.dart';
 import '../core/routing/app_routes.dart';
 import '../core/theme/app_themes.dart';
 import 'shell/nav_bar_shell.dart';
@@ -12,21 +11,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      // One ChangeNotifier per table. `create` is lazy: a controller is only
-      // built when a widget first reads it, so nothing touches Supabase at
-      // startup.
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserController()),
-        ChangeNotifierProvider(create: (_) => EventController()),
-        ChangeNotifierProvider(create: (_) => EventInvitationController()),
-        ChangeNotifierProvider(create: (_) => CircleController()),
-        ChangeNotifierProvider(create: (_) => CircleMemberController()),
-        ChangeNotifierProvider(create: (_) => ChatController()),
-        ChangeNotifierProvider(create: (_) => MessageController()),
-        ChangeNotifierProvider(create: (_) => FriendController()),
-        ChangeNotifierProvider(create: (_) => BlockedUserController()),
-      ],
+    return buildProviderScope(
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: AppThemes.themeModeValue,
         builder: (context, mode, _) {
