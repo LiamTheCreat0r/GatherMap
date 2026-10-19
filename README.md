@@ -75,8 +75,16 @@ The built-in mailer is a development convenience with hard limits:
   before you tapped it.
 
 For anything past a quick test, configure custom SMTP (Authentication → Emails →
-SMTP Settings). To iterate locally, run the stack and read the mail it captures
-in Inbucket at `http://localhost:54324`, with no delivery or rate limits:
+SMTP Settings).
+
+To skip delivery entirely while developing, turn **Confirm email** off
+(Authentication → Sign In / Providers → Email, then Save). Sign-up then returns a
+session and the app goes straight to onboarding. Re-enable it before release,
+together with custom SMTP. This only affects sign-up: password-reset and resend
+emails still go through the mailer and stay slow until SMTP is configured.
+
+To iterate locally, run the stack and read the mail it captures in Inbucket at
+`http://localhost:54324`, with no delivery or rate limits:
 
 ```bash
 supabase start      # prints the local API URL and anon key for .env
