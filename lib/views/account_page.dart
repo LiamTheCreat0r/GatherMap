@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../core/theme/custom_colors.dart';
 import './widgets/page_header.dart';
 
-
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -22,154 +21,159 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       backgroundColor: colors.mainBackgroundColor,
       body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const PageHeader(title: 'Mon Compte'),
-              Row(
+        children: [
+          const PageHeader(title: 'Mon Compte'),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: primaryColor, // Utilise la couleur d'accentuation orange
-                    child: const Text(
-                      'YO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Moi',
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 36,
+                        backgroundColor:
+                            primaryColor, // Utilise la couleur d'accentuation orange
+                        child: const Text(
+                          'YO',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '@moi · Toulouse',
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Moi',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '@moi · Toulouse',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.more_horiz, color: Colors.white),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // Cartes de statistiques (Événements, À venir, Organisés)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          count: '6',
+                          label: 'Événements',
+                          highlightColor: primaryColor,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          count: '3',
+                          label: 'À venir',
+                          highlightColor: primaryColor,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          count: '2',
+                          label: 'Organisés',
+                          highlightColor: primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Sélecteur Mode sombre
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFF1E1E1E,
+                      ), // Arrière-plan de carte sombre
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.nightlight_round_outlined,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Mode sombre',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[400],
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
+                        ),
+                        const Spacer(),
+                        Switch(
+                          value: isDarkMode,
+                          onChanged: (val) {
+                            setState(() {
+                              isDarkMode = val;
+                            });
+                          },
+                          activeThumbColor: Colors.white,
+                          activeTrackColor: primaryColor,
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_horiz, color: Colors.white),
+
+                  const SizedBox(height: 20),
+
+                  // Menu d'options
+                  _buildMenuItem(title: 'Notifications', onTap: () {}),
+                  _buildMenuItem(title: 'Confidentialité', onTap: () {}),
+                  _buildMenuItem(title: "Demandes d'amis (2)", onTap: () {}),
+                  _buildMenuItem(title: 'Aide', onTap: () {}),
+                  const SizedBox(height: 12),
+                  _buildMenuItem(
+                    title: 'Se déconnecter',
+                    textColor: const Color(0xFFE53935),
+                    showChevron: false,
+                    onTap: () {},
                   ),
                 ],
               ),
-
-              const SizedBox(height: 28),
-
-              // Cartes de statistiques (Événements, À venir, Organisés)
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      count: '6',
-                      label: 'Événements',
-                      highlightColor: primaryColor,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      count: '3',
-                      label: 'À venir',
-                      highlightColor: primaryColor,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      count: '2',
-                      label: 'Organisés',
-                      highlightColor: primaryColor,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Sélecteur Mode sombre
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E), // Arrière-plan de carte sombre
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.nightlight_round_outlined, color: Colors.white),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Mode sombre',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    Switch(
-                      value: isDarkMode,
-                      onChanged: (val) {
-                        setState(() {
-                          isDarkMode = val;
-                        });
-                      },
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: primaryColor,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Menu d'options
-              _buildMenuItem(
-                title: 'Notifications',
-                onTap: () {},
-              ),
-              _buildMenuItem(
-                title: 'Confidentialité',
-                onTap: () {},
-              ),
-              _buildMenuItem(
-                title: "Demandes d'amis (2)",
-                onTap: () {},
-              ),
-              _buildMenuItem(
-                title: 'Aide',
-                onTap: () {},
-              ),
-              const SizedBox(height: 12),
-              _buildMenuItem(
-                title: 'Se déconnecter',
-                textColor: const Color(0xFFE53935),
-                showChevron: false,
-                onTap: () {},
-              ),
-            ],
+            ),
           ),
-        );
+        ],
+      ),
+    );
   }
 
   Widget _buildStatCard(
@@ -199,10 +203,7 @@ class _AccountPageState extends State<AccountPage> {
           const SizedBox(height: 6),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ],
@@ -233,11 +234,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
             if (showChevron)
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.white54,
-                size: 20,
-              ),
+              const Icon(Icons.chevron_right, color: Colors.white54, size: 20),
           ],
         ),
       ),
