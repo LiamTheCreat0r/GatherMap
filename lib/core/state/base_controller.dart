@@ -12,11 +12,11 @@ import '../error/describe_error.dart';
 /// [ControllerStatus.ready] or [ControllerStatus.error].
 enum ControllerStatus { idle, loading, ready, error }
 
-/// Base class for the controllers that sit between the generated models in
-/// `lib/models/` and the views in `lib/views/`.
+/// Base class for every controller in the app.
 ///
-/// A controller owns the state of one table: it runs queries through
-/// [client], keeps the result in fields exposed by getters, and reports
+/// A controller owns the state of one feature slice: it runs queries through
+/// [client] (legacy controllers) or through an injected repository (the events
+/// feature), keeps the result in fields exposed by getters, and reports
 /// [status]/[error] so views can render loading and failure states.
 ///
 /// Subclasses implement the queries and call [runAction] (fire-and-forget
