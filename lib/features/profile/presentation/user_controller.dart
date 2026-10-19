@@ -1,6 +1,6 @@
-import '../models/supadart_header.dart';
-import '../models/user.dart';
-import '../../core/state/base_controller.dart';
+import '../../../models/supadart_header.dart';
+import '../../../models/user.dart';
+import '../../../core/state/base_controller.dart';
 
 /// Controller for the `user` table (profiles, not Supabase auth).
 ///

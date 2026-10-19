@@ -1,6 +1,6 @@
-import '../models/blocked_user.dart';
-import '../models/supadart_header.dart';
-import '../../core/state/base_controller.dart';
+import '../../../models/blocked_user.dart';
+import '../../../models/supadart_header.dart';
+import '../../../core/state/base_controller.dart';
 
 /// Controller for the `blocked_user` table.
 ///

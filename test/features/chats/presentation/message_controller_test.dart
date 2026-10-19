@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gathermap/controllers/message_controller.dart';
+import 'package:gathermap/features/chats/presentation/message_controller.dart';
 
 void main() {
   group('MessageController state', () {

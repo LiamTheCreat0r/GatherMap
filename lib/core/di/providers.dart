@@ -1,20 +1,20 @@
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../../controllers/blocked_user_controller.dart';
-import '../../controllers/chat_controller.dart';
-import '../../controllers/circle_controller.dart';
-import '../../controllers/circle_member_controller.dart';
-import '../../controllers/event_invitation_controller.dart';
-import '../../controllers/friend_controller.dart';
-import '../../controllers/message_controller.dart';
-import '../../controllers/user_controller.dart';
 import '../../data/supabase/supabase_service.dart';
+import '../../features/chats/presentation/chat_controller.dart';
+import '../../features/chats/presentation/message_controller.dart';
+import '../../features/circles/presentation/circle_controller.dart';
+import '../../features/circles/presentation/circle_member_controller.dart';
 import '../../features/events/data/event_mapper.dart';
 import '../../features/events/data/event_remote_data_source.dart';
 import '../../features/events/data/event_repository_impl.dart';
 import '../../features/events/domain/event_repository.dart';
 import '../../features/events/presentation/event_controller.dart';
+import '../../features/events/presentation/event_invitation_controller.dart';
+import '../../features/friends/presentation/blocked_user_controller.dart';
+import '../../features/friends/presentation/friend_controller.dart';
+import '../../features/profile/presentation/user_controller.dart';
 
 /// The concrete implementations the app runs against.
 ///

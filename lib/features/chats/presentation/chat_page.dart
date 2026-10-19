@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/custom_colors.dart';
-import '../core/theme/custom_text_styles.dart';
-import '../core/widgets/page_header.dart';
+import '../../../core/theme/custom_colors.dart';
+import '../../../core/theme/custom_text_styles.dart';
+import '../../../core/widgets/avatar_row.dart';
+import '../../../core/widgets/page_header.dart';
+import '../../../core/widgets/section_title.dart';
 
 enum ChatType { circle, event, friend }
 
@@ -111,14 +113,14 @@ List<ChatItem> _placeholderChats() {
   ];
 }
 
-/// Events tab: an orange header over a scrollable, sectioned list of
-/// upcoming and past events.
+/// Messages tab: an orange header over a scrollable, sectioned list of
+/// circle, event and friend conversations.
 ///
 /// All colours and text styles come from the [CustomColors] and
 /// [CustomTextStyles] theme extensions, so light and dark mode are handled by
 /// the active theme with no branching here.
-class Chat extends StatelessWidget {
-  const Chat({super.key});
+class ChatPage extends StatelessWidget {
+  const ChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +148,7 @@ class Chat extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               children: [
                 if (friendChats.isNotEmpty) ...[
-                  _SectionTitle(
+                  SectionTitle(
                     label: 'AMIS',
                     textStyles: textStyles,
                     colors: colors,
@@ -167,7 +169,7 @@ class Chat extends StatelessWidget {
                   const SizedBox(height: 30),
 
                 if (circleChats.isNotEmpty) ...[
-                  _SectionTitle(
+                  SectionTitle(
                     label: 'CERCLES',
                     textStyles: textStyles,
                     colors: colors,
@@ -188,7 +190,7 @@ class Chat extends StatelessWidget {
                   const SizedBox(height: 30),
 
                 if (eventChats.isNotEmpty) ...[
-                  _SectionTitle(
+                  SectionTitle(
                     label: 'ÉVÉNEMENTS',
                     textStyles: textStyles,
                     colors: colors,
@@ -207,32 +209,6 @@ class Chat extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.label,
-    required this.textStyles,
-    required this.colors,
-  });
-
-  final String label;
-  final CustomTextStyles textStyles;
-  final CustomColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        label,
-        style: textStyles.legendStyle.copyWith(
-          color: colors.secondaryTextColor,
-          letterSpacing: 1.0,
-        ),
       ),
     );
   }
@@ -407,7 +383,11 @@ class _InfoCard extends StatelessWidget {
                 ),
                 if (chat.members.isNotEmpty) ...[
                   const SizedBox(height: 3),
-                  _AvatarRow(names: chat.members, ringColor: colors.cardColor),
+                  AvatarRow(
+                    names: chat.members,
+                    ringColor: colors.cardColor,
+                    size: 16,
+                  ),
                 ],
               ],
             ),
@@ -418,84 +398,7 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-const List<Color> _avatarPalette = [
-  Color(0xFFC77D51),
-  Color(0xFF8A9A7B),
-  Color(0xFF7C8AA0),
-  Color(0xFFB08B9E),
-  Color(0xFFA88B5C),
-];
-
-/// Up to four overlapping 16px circular avatars drawn from attendee initials.
-class _AvatarRow extends StatelessWidget {
-  const _AvatarRow({required this.names, required this.ringColor});
-
-  final List<String> names;
-  final Color ringColor;
-
-  static const double _size = 16;
-  static const double _overlapStep = 12;
-
-  @override
-  Widget build(BuildContext context) {
-    final shown = names.take(4).toList();
-
-    return SizedBox(
-      height: _size,
-      width: _size + (shown.length - 1) * _overlapStep,
-      child: Stack(
-        children: [
-          for (var i = 0; i < shown.length; i++)
-            Positioned(
-              left: i * _overlapStep,
-              child: _Avatar(name: shown[i], index: i, ringColor: ringColor),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A single 16px circle showing an attendee's initial.
-class _Avatar extends StatelessWidget {
-  const _Avatar({
-    required this.name,
-    required this.index,
-    required this.ringColor,
-  });
-
-  final String name;
-  final int index;
-  final Color ringColor;
-
-  static const double _size = 16;
-
-  @override
-  Widget build(BuildContext context) {
-    final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
-
-    return Container(
-      width: _size,
-      height: _size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: _avatarPalette[index % _avatarPalette.length],
-        shape: BoxShape.circle,
-        border: Border.all(color: ringColor, width: 1.5),
-      ),
-      child: Text(
-        initial,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.w600,
-          height: 1,
-        ),
-      ),
-    );
-  }
-}
-
+/// Rounded-square conversation icon, distinct from the circular [Avatar].
 class _ChatAvatar extends StatelessWidget {
   const _ChatAvatar({
     required this.name,
@@ -518,7 +421,7 @@ class _ChatAvatar extends StatelessWidget {
       height: _size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: _avatarPalette[index % _avatarPalette.length],
+        color: avatarPalette[index % avatarPalette.length],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

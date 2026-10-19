@@ -1,6 +1,6 @@
-import '../models/event_invitation.dart';
-import '../models/supadart_header.dart';
-import '../../core/state/base_controller.dart';
+import '../../../models/event_invitation.dart';
+import '../../../models/supadart_header.dart';
+import '../../../core/state/base_controller.dart';
 
 /// Controller for the `event_invitation` table.
 ///

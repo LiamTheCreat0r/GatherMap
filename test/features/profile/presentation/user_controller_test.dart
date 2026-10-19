@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gathermap/controllers/user_controller.dart';
+import 'package:gathermap/features/profile/presentation/user_controller.dart';
 import 'package:gathermap/models/user.dart';
 
 User _user(String id) => User(

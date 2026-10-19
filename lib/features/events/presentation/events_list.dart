@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/custom_colors.dart';
-import '../core/theme/custom_text_styles.dart';
-import '../core/widgets/page_header.dart';
+import '../../../core/theme/custom_colors.dart';
+import '../../../core/theme/custom_text_styles.dart';
+import '../../../core/widgets/avatar_row.dart';
+import '../../../core/widgets/page_header.dart';
+import '../../../core/widgets/section_title.dart';
 
 /// Minimal event shape used to render the Events list while the real Supabase
 /// fetch is not wired up yet. Named `EventItem` to avoid clashing with the
@@ -126,14 +128,6 @@ List<EventItem> _placeholderEvents() {
 }
 
 /// Muted avatar tints that read well on both the light and dark card colour.
-const List<Color> _avatarPalette = [
-  Color(0xFFC77D51),
-  Color(0xFF8A9A7B),
-  Color(0xFF7C8AA0),
-  Color(0xFFB08B9E),
-  Color(0xFFA88B5C),
-];
-
 /// Events tab: an orange header over a scrollable, sectioned list of
 /// upcoming and past events.
 ///
@@ -165,7 +159,7 @@ class EventsList extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               children: [
                 if (upcoming.isNotEmpty) ...[
-                  _SectionTitle(
+                  SectionTitle(
                     label: 'À VENIR',
                     textStyles: textStyles,
                     colors: colors,
@@ -183,7 +177,7 @@ class EventsList extends StatelessWidget {
                 if (upcoming.isNotEmpty && past.isNotEmpty)
                   const SizedBox(height: 20),
                 if (past.isNotEmpty) ...[
-                  _SectionTitle(
+                  SectionTitle(
                     label: 'PASSÉS',
                     textStyles: textStyles,
                     colors: colors,
@@ -202,33 +196,6 @@ class EventsList extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Uppercase Outfit section heading ("À VENIR", "PASSÉS").
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.label,
-    required this.textStyles,
-    required this.colors,
-  });
-
-  final String label;
-  final CustomTextStyles textStyles;
-  final CustomColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        label,
-        style: textStyles.legendStyle.copyWith(
-          color: colors.secondaryTextColor,
-          letterSpacing: 1.0,
-        ),
       ),
     );
   }
@@ -379,7 +346,7 @@ class _InfoCard extends StatelessWidget {
                 ),
                 if (event.attendees.isNotEmpty) ...[
                   const SizedBox(height: 6),
-                  _AvatarRow(
+                  AvatarRow(
                     names: event.attendees,
                     ringColor: colors.cardColor,
                   ),
@@ -395,76 +362,6 @@ class _InfoCard extends StatelessWidget {
             textStyles: textStyles,
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Up to four overlapping 18px circular avatars drawn from attendee initials.
-class _AvatarRow extends StatelessWidget {
-  const _AvatarRow({required this.names, required this.ringColor});
-
-  final List<String> names;
-  final Color ringColor;
-
-  static const double _size = 18;
-  static const double _overlapStep = 12;
-
-  @override
-  Widget build(BuildContext context) {
-    final shown = names.take(4).toList();
-
-    return SizedBox(
-      height: _size,
-      width: _size + (shown.length - 1) * _overlapStep,
-      child: Stack(
-        children: [
-          for (var i = 0; i < shown.length; i++)
-            Positioned(
-              left: i * _overlapStep,
-              child: _Avatar(name: shown[i], index: i, ringColor: ringColor),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A single 18px circle showing an attendee's initial.
-class _Avatar extends StatelessWidget {
-  const _Avatar({
-    required this.name,
-    required this.index,
-    required this.ringColor,
-  });
-
-  final String name;
-  final int index;
-  final Color ringColor;
-
-  static const double _size = 18;
-
-  @override
-  Widget build(BuildContext context) {
-    final initial = name.isNotEmpty ? name.characters.first.toUpperCase() : '?';
-
-    return Container(
-      width: _size,
-      height: _size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: _avatarPalette[index % _avatarPalette.length],
-        shape: BoxShape.circle,
-        border: Border.all(color: ringColor, width: 1.5),
-      ),
-      child: Text(
-        initial,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-          height: 1,
-        ),
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/theme/custom_colors.dart';
-import '../core/widgets/page_header.dart';
+import '../../../core/theme/custom_colors.dart';
+import '../../../core/widgets/page_header.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
