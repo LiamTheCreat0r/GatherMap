@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gathermap/views/account_page.dart';
 import 'package:gathermap/views/chat.dart';
 
-import '../../core/route.dart';
-import '../events_list.dart';
-import '../map_page.dart';
+import '../../core/routing/app_routes.dart';
+import '../../views/events_list.dart';
+import '../../views/map_page.dart';
 import 'navbar.dart';
 
 /// Hosts the four tab pages and the bottom navigation bar.

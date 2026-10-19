@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/custom_colors.dart';
+import '../core/widgets/page_header.dart';
 import 'widgets/create_event_dialog.dart';
 import 'widgets/map_widget.dart';
-import 'widgets/page_header.dart';
 import 'widgets/visibility_toggle.dart';
 
 /// Map tab: the orange [PageHeader] over the full-bleed [Map].

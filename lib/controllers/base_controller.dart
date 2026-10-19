@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../services/supabase_service.dart';
+import '../../data/supabase/supabase_service.dart';
 
 /// Lifecycle shared by every controller in `lib/controllers/`.
 ///

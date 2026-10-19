@@ -9,7 +9,7 @@ import '../../core/theme/custom_colors.dart';
 import '../../core/theme/custom_text_styles.dart';
 import '../../models/event.dart';
 import 'event_pin.dart';
-import 'loading_dots.dart';
+import '../../core/widgets/loading_dots.dart';
 
 /// GeoJSON source holding every pinned event as a point feature.
 const String _eventsSourceId = 'event-pins';

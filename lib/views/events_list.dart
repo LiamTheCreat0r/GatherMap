@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/custom_colors.dart';
 import '../core/theme/custom_text_styles.dart';
-import 'widgets/page_header.dart';
+import '../core/widgets/page_header.dart';
 
 /// Minimal event shape used to render the Events list while the real Supabase
 /// fetch is not wired up yet. Named `EventItem` to avoid clashing with the

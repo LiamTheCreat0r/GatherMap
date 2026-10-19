@@ -17,7 +17,7 @@ class Logs {
         '${record.time.toIso8601String()} '
         '[${record.level.name}] ${record.loggerName}: ${record.message}',
       );
-      if (record.error != null) debugPrint('  Erreur : ${record.error}');
+      if (record.error != null) debugPrint('  error: ${record.error}');
       if (record.stackTrace != null) debugPrint('${record.stackTrace}');
     });
   }

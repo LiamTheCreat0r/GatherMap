@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../core/theme/app_themes.dart';
-import '../../../core/theme/custom_colors.dart';
+import '../../core/theme/app_themes.dart';
+import '../../core/theme/custom_colors.dart';
 
 /// The four primary tabs of the app, in display order.
 ///

@@ -7,10 +7,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
-import 'package:gathermap/core/route.dart';
-import 'package:gathermap/main.dart';
-import 'package:gathermap/views/widgets/navbar.dart';
-import 'package:gathermap/views/widgets/nav_bar_shell.dart';
+import 'package:gathermap/app/shell/nav_bar_shell.dart';
+import 'package:gathermap/app/shell/navbar.dart';
+import 'package:gathermap/app/app.dart';
+import 'package:gathermap/core/routing/app_routes.dart';
 
 /// A no-op MapLibre platform used while the navbar shell is under test.
 ///
