@@ -1,6 +1,6 @@
 import '../models/circle.dart';
 import '../models/supadart_header.dart';
-import 'base_controller.dart';
+import '../../core/state/base_controller.dart';
 
 /// Controller for the `circle` table.
 ///

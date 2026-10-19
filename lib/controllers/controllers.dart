@@ -7,7 +7,7 @@ library;
 /// controller and its model import `package:gathermap/models/<table>.dart`
 /// themselves, which keeps the generated `User` clear of the auth `User`
 /// exported by `package:supabase_flutter`.
-export 'base_controller.dart';
+export '../../core/state/base_controller.dart';
 export 'blocked_user_controller.dart';
 export 'circle_controller.dart';
 export 'circle_member_controller.dart';

@@ -1,6 +1,6 @@
 import '../models/circle_member.dart';
 import '../models/supadart_header.dart';
-import 'base_controller.dart';
+import '../../core/state/base_controller.dart';
 
 /// Controller for the `circle_member` table (the join between circles and
 /// the users in them).
