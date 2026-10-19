@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../features/events/presentation/event_controller.dart';
-import '../../core/theme/custom_colors.dart';
-import '../../core/theme/custom_text_styles.dart';
-import '../../models/event.dart';
-import '../../services/address_service.dart';
+import '../event_controller.dart';
+import '../../../../core/theme/custom_colors.dart';
+import '../../../../core/theme/custom_text_styles.dart';
+import '../../../../models/event.dart';
+import '../../data/address_service.dart';
 
 /// Stand-in owner for events created before an auth/session layer exists.
 ///
@@ -18,11 +18,14 @@ const _defaultOwnerId = 'a0000000-0000-0000-0000-000000000001';
 /// dismissing it (tap outside, the close button, or a footer action) returns to
 /// the map untouched. Resolves with the [Event] that was inserted, or `null`
 /// when the window was dismissed without creating one.
-Future<Event?> showCreateEventDialog(BuildContext context) {
+Future<Event?> showCreateEventDialog(
+  BuildContext context, {
+  AddressService? addressService,
+}) {
   return showDialog<Event>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => const CreateEventDialog(),
+    builder: (_) => CreateEventDialog(addressService: addressService),
   );
 }
 
@@ -34,7 +37,11 @@ Future<Event?> showCreateEventDialog(BuildContext context) {
 /// [CustomColors] and [CustomTextStyles] theme extensions, so light and dark
 /// mode are handled by the active theme with no branching here.
 class CreateEventDialog extends StatefulWidget {
-  const CreateEventDialog({super.key});
+  const CreateEventDialog({super.key, this.addressService});
+
+  /// Geocoder used by the location field. Defaults to a live [AddressService];
+  /// a test can pass a stub.
+  final AddressService? addressService;
 
   @override
   State<CreateEventDialog> createState() => _CreateEventDialogState();
@@ -42,6 +49,10 @@ class CreateEventDialog extends StatefulWidget {
 
 class _CreateEventDialogState extends State<CreateEventDialog> {
   final _nameController = TextEditingController();
+
+  /// Geocoder for the location field, created once per dialog.
+  late final AddressService _addressService =
+      widget.addressService ?? AddressService();
 
   /// Selected event icon; empty means none chosen yet.
   String _emoji = '';
@@ -312,6 +323,7 @@ class _CreateEventDialogState extends State<CreateEventDialog> {
                     ),
                     const SizedBox(height: 6),
                     _AddressField(
+                      service: _addressService,
                       initialValue: _location,
                       colors: colors,
                       textStyles: textStyles,
@@ -478,11 +490,15 @@ class _AddressField extends StatefulWidget {
     required this.initialValue,
     required this.colors,
     required this.textStyles,
+    required this.service,
     required this.onChanged,
     required this.onSuggestionSelected,
   });
 
   final String initialValue;
+
+  /// Geocoder backing the suggestions; owned by the dialog, not this field.
+  final AddressService service;
   final CustomColors colors;
   final CustomTextStyles textStyles;
 
@@ -498,8 +514,6 @@ class _AddressField extends StatefulWidget {
 }
 
 class _AddressFieldState extends State<_AddressField> {
-  final AddressService _service = AddressService();
-
   /// Incremented per keystroke; a lookup whose token is stale is discarded.
   int _queryToken = 0;
 
@@ -511,7 +525,7 @@ class _AddressFieldState extends State<_AddressField> {
     if (token != _queryToken) return const [];
 
     try {
-      return await _service.search(query);
+      return await widget.service.search(query);
     } on Object {
       // A failed lookup just shows no suggestions; the user can still type.
       return const [];

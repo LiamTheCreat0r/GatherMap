@@ -4,8 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../core/theme/custom_colors.dart';
-import '../../core/theme/custom_text_styles.dart';
+import '../../../../core/theme/custom_colors.dart';
+import '../../../../core/theme/custom_text_styles.dart';
 
 // --- Pin geometry (logical pixels), shared by every rendering path. ---
 const double _pillHPad = 12;

@@ -4,7 +4,7 @@ import 'package:gathermap/views/chat.dart';
 
 import '../../core/routing/app_routes.dart';
 import '../../views/events_list.dart';
-import '../../views/map_page.dart';
+import '../../features/map/presentation/map_page.dart';
 import 'navbar.dart';
 
 /// Hosts the four tab pages and the bottom navigation bar.

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/custom_colors.dart';
+import '../../../../core/theme/custom_colors.dart';
 
 /// Who an event on the map is visible to.
 enum MapVisibility {

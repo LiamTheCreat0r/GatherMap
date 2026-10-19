@@ -40,7 +40,8 @@ class AddressService {
     : _client = client ?? http.Client(),
       _apiKey = apiKey ?? defaultApiKey;
 
-  /// MapTiler key shared with the map widget in `views/widgets/map_widget.dart`.
+  /// MapTiler key shared with the map widget in
+  /// `features/map/presentation/widgets/map_widget.dart`.
   static const String defaultApiKey = 'nHhdC9Q6mdTwQ6qo9eiV';
 
   static const String _endpoint = 'https://api.maptiler.com/geocoding';

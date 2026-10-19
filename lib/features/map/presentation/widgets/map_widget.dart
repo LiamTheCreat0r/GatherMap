@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/custom_colors.dart';
-import '../../core/theme/custom_text_styles.dart';
-import '../../core/widgets/loading_dots.dart';
-import '../../features/events/domain/event.dart';
-import '../../features/events/presentation/event_controller.dart';
+import '../../../../core/theme/custom_colors.dart';
+import '../../../../core/theme/custom_text_styles.dart';
+import '../../../../core/widgets/loading_dots.dart';
+import '../../../events/domain/event.dart';
+import '../../../events/presentation/event_controller.dart';
 import 'event_pin.dart';
 
 /// GeoJSON source holding every pinned event as a point feature.

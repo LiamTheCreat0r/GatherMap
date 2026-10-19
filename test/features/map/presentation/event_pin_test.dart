@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gathermap/core/theme/app_themes.dart';
 import 'package:gathermap/core/theme/custom_colors.dart';
 import 'package:gathermap/core/theme/custom_text_styles.dart';
-import 'package:gathermap/views/widgets/event_pin.dart';
+import 'package:gathermap/features/map/presentation/widgets/event_pin.dart';
 
 /// Pins are painted, not composed of widgets, so the theme's extensions are
 /// read directly the way [EventPin] reads them.
