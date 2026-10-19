@@ -36,6 +36,7 @@ Dependency rule inside a feature: `presentation → domain ← data`. Only
 - Row access uses extension getters on the client (`client.event`, `client.user`, …) from `lib/models/supadart_header.dart`. Data sources import that header explicitly.
 - UI shell: `lib/app/shell/nav_bar_shell.dart` hosts the four tabs in an `IndexedStack` and builds each tab only once visited (starting MapLibre on launch would ANR). Detail routes in `AppRoutes.hiddenNavRoutes` hide the bottom bar through `CurrentRoute`.
 - The Events and Messages tabs still render hard-coded placeholder models (`EventItem`, `ChatItem`); only the map and the create-event dialog are wired to a real controller.
+- **Device location lives in `lib/services/location_service.dart`** (cross-feature glue, alongside `data/supabase/`): a `LocationProvider` seam over `geolocator` (hand-written fakes in tests) plus a `LocationService.locate()` that never throws and folds denials into a `LocationResult`. The locate button in `features/map/presentation/widgets/map_widget.dart` takes an injectable `LocationService`. Android declares `ACCESS_FINE/COARSE_LOCATION`, iOS declares `NSLocationWhenInUseUsageDescription`; the browser prompts on its own (web needs HTTPS/localhost).
 
 ## Generated code & Supabase
 
