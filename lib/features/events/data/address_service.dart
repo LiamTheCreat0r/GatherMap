@@ -2,24 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-/// One address suggestion returned by the geocoding provider.
-///
-/// [placeName] is the human-readable label shown in the list and stored in the
-/// event's `location`; the coordinates are kept for callers that want to place
-/// the event on the map later.
-class AddressSuggestion {
-  const AddressSuggestion({
-    required this.placeName,
-    required this.latitude,
-    required this.longitude,
-  });
-
-  /// Full label, e.g. "Café de la Gare, 1 Place ..., Paris, France".
-  final String placeName;
-
-  final double latitude;
-  final double longitude;
-}
+import '../domain/address_search.dart';
 
 /// Thrown when the geocoding provider answers with a non-200 status.
 class AddressException implements Exception {
@@ -35,7 +18,7 @@ class AddressException implements Exception {
 ///
 /// The [client] and [apiKey] are injectable so tests can stub the network; the
 /// defaults reuse the same MapTiler key the map already uses.
-class AddressService {
+class AddressService implements AddressSearch {
   AddressService({http.Client? client, String? apiKey})
     : _client = client ?? http.Client(),
       _apiKey = apiKey ?? defaultApiKey;
@@ -49,10 +32,7 @@ class AddressService {
   final http.Client _client;
   final String _apiKey;
 
-  /// Looks up addresses matching [query], best match first.
-  ///
-  /// Returns an empty list for a blank query. Throws [AddressException] when
-  /// the provider answers with a non-200 status.
+  @override
   Future<List<AddressSuggestion>> search(String query, {int limit = 6}) async {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return const [];

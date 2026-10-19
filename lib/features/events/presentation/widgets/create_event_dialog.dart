@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../event_controller.dart';
 import '../../../../core/theme/custom_colors.dart';
 import '../../../../core/theme/custom_text_styles.dart';
-import '../../../../models/event.dart';
-import '../../data/address_service.dart';
+import '../../domain/event.dart';
+import '../../domain/address_search.dart';
 
 /// Stand-in owner for events created before an auth/session layer exists.
 ///
@@ -20,7 +20,7 @@ const _defaultOwnerId = 'a0000000-0000-0000-0000-000000000001';
 /// when the window was dismissed without creating one.
 Future<Event?> showCreateEventDialog(
   BuildContext context, {
-  AddressService? addressService,
+  AddressSearch? addressService,
 }) {
   return showDialog<Event>(
     context: context,
@@ -39,9 +39,9 @@ Future<Event?> showCreateEventDialog(
 class CreateEventDialog extends StatefulWidget {
   const CreateEventDialog({super.key, this.addressService});
 
-  /// Geocoder used by the location field. Defaults to a live [AddressService];
-  /// a test can pass a stub.
-  final AddressService? addressService;
+  /// Geocoder used by the location field. Defaults to the live MapTiler
+  /// implementation; a test can pass a stub.
+  final AddressSearch? addressService;
 
   @override
   State<CreateEventDialog> createState() => _CreateEventDialogState();
@@ -50,9 +50,10 @@ class CreateEventDialog extends StatefulWidget {
 class _CreateEventDialogState extends State<CreateEventDialog> {
   final _nameController = TextEditingController();
 
-  /// Geocoder for the location field, created once per dialog.
-  late final AddressService _addressService =
-      widget.addressService ?? AddressService();
+  /// Geocoder for the location field: the injected stub when a test supplied
+  /// one, otherwise the instance from the provider scope.
+  AddressSearch get _addressService =>
+      widget.addressService ?? context.read<AddressSearch>();
 
   /// Selected event icon; empty means none chosen yet.
   String _emoji = '';
@@ -480,7 +481,7 @@ class _FieldError extends StatelessWidget {
   }
 }
 
-/// Address input with live autocomplete backed by [AddressService].
+/// Address input with live autocomplete backed by an [AddressSearch].
 ///
 /// Typing triggers a debounced geocoding lookup; tapping a suggestion fills the
 /// field with its full label. Free text is still allowed if the user does not
@@ -498,7 +499,7 @@ class _AddressField extends StatefulWidget {
   final String initialValue;
 
   /// Geocoder backing the suggestions; owned by the dialog, not this field.
-  final AddressService service;
+  final AddressSearch service;
   final CustomColors colors;
   final CustomTextStyles textStyles;
 

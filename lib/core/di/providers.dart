@@ -6,12 +6,14 @@ import '../../features/chats/presentation/chat_controller.dart';
 import '../../features/chats/presentation/message_controller.dart';
 import '../../features/circles/presentation/circle_controller.dart';
 import '../../features/circles/presentation/circle_member_controller.dart';
+import '../../features/events/data/address_service.dart';
 import '../../features/events/data/event_mapper.dart';
 import '../../features/events/data/event_remote_data_source.dart';
 import '../../features/events/data/event_repository_impl.dart';
+import '../../features/events/domain/address_search.dart';
 import '../../features/events/domain/event_repository.dart';
 import '../../features/events/presentation/event_controller.dart';
-import '../../features/events/presentation/event_invitation_controller.dart';
+import '../../features/invitations/presentation/event_invitation_controller.dart';
 import '../../features/friends/presentation/blocked_user_controller.dart';
 import '../../features/friends/presentation/friend_controller.dart';
 import '../../features/profile/presentation/user_controller.dart';
@@ -35,6 +37,9 @@ class AppDependencies {
 
   /// The events feature's data contract, implemented over Supabase.
   late final EventRepository eventRepository;
+
+  /// Geocoder used by the create-event form.
+  late final AddressSearch addressSearch = AddressService();
 }
 
 /// Wraps [child] in the provider scope the app expects.
@@ -49,6 +54,7 @@ Widget buildProviderScope({
 
   return MultiProvider(
     providers: [
+      Provider<AddressSearch>.value(value: deps.addressSearch),
       ChangeNotifierProvider(create: (_) => UserController()),
       ChangeNotifierProvider(
         create: (_) => EventController(deps.eventRepository),
