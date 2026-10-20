@@ -8,12 +8,17 @@ import '../../features/chats/presentation/message_controller.dart';
 import '../../features/circles/presentation/circle_controller.dart';
 import '../../features/circles/presentation/circle_member_controller.dart';
 import '../../features/events/data/address_service.dart';
+import '../../features/events/data/event_guest_mapper.dart';
+import '../../features/events/data/event_guest_remote_data_source.dart';
+import '../../features/events/data/event_guest_repository_impl.dart';
 import '../../features/events/data/event_mapper.dart';
 import '../../features/events/data/event_remote_data_source.dart';
 import '../../features/events/data/event_repository_impl.dart';
 import '../../features/events/domain/address_search.dart';
+import '../../features/events/domain/event_guest_repository.dart';
 import '../../features/events/domain/event_repository.dart';
 import '../../features/events/presentation/event_controller.dart';
+import '../../features/events/presentation/event_guest_controller.dart';
 import '../../features/invitations/presentation/event_invitation_controller.dart';
 import '../../features/friends/presentation/blocked_user_controller.dart';
 import '../../features/friends/presentation/friend_controller.dart';
@@ -32,12 +37,19 @@ class AppDependencies {
       EventRemoteDataSource(_service),
       const EventMapper(),
     );
+    eventGuestRepository = SupabaseEventGuestRepository(
+      EventGuestRemoteDataSource(_service),
+      const EventGuestMapper(),
+    );
   }
 
   final SupabaseService _service;
 
   /// The events feature's data contract, implemented over Supabase.
   late final EventRepository eventRepository;
+
+  /// Guests and organiser lookup for the event detail sheet.
+  late final EventGuestRepository eventGuestRepository;
 
   /// Geocoder used by the create-event form.
   late final AddressSearch addressSearch = AddressService();
@@ -69,6 +81,9 @@ Widget buildProviderScope({
 
       ChangeNotifierProvider(
         create: (_) => EventController(deps.eventRepository),
+      ),
+      ChangeNotifierProvider(
+        create: (_) => EventGuestController(deps.eventGuestRepository),
       ),
       ChangeNotifierProvider(create: (_) => EventInvitationController()),
       ChangeNotifierProvider(create: (_) => CircleController()),

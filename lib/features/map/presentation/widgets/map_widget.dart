@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math' show Point;
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -49,11 +50,25 @@ const String _userLocationLayerId = 'user-location-layer';
 /// accent-coloured dot. Denials and disabled services surface as a snack bar
 /// with a shortcut to the relevant settings.
 class Map extends StatefulWidget {
-  const Map({super.key, this.locationService = const LocationService()});
+  const Map({
+    super.key,
+    this.locationService = const LocationService(),
+    this.selectedEvent,
+    this.onSelectedEventChanged,
+  });
 
   /// Resolves the device's position (with permission) for the locate button.
   /// Injectable so tests can supply a fake provider.
   final LocationService locationService;
+
+  /// Event whose detail sheet is open, or `null` when no sheet is shown.
+  ///
+  /// The sheet itself lives one level up in `MapPage`, above the header and
+  /// floating button; this widget only reports pin selections.
+  final Event? selectedEvent;
+
+  /// Reports a pin tap (`event`) or a map-background tap (`null`).
+  final ValueChanged<Event?>? onSelectedEventChanged;
 
   @override
   State<Map> createState() => _MapState();
@@ -111,6 +126,74 @@ class _MapState extends State<Map> {
       if (!mounted) return;
       context.read<EventController>().fetchUpcoming();
     });
+  }
+
+  @override
+  void dispose() {
+    _controller?.onFeatureTapped.remove(_onFeatureTapped);
+    super.dispose();
+  }
+
+  /// Wires the controller up as soon as the platform view exists.
+  ///
+  /// The listener is registered here rather than in [_onStyleLoaded]: a style
+  /// reload does not recreate the controller, and registering per style load
+  /// would accumulate duplicate callbacks.
+  void _onMapCreated(MapLibreMapController controller) {
+    _controller = controller;
+    controller.onFeatureTapped.add(_onFeatureTapped);
+  }
+
+  /// Opens the bottom detail sheet for a tapped event pin.
+  ///
+  /// The tapped feature id is not guaranteed to be the event id across
+  /// platforms, so the feature's own `eventId` property is read back with
+  /// [MapLibreMapController.queryRenderedFeatures]; the callback id is only a
+  /// fallback when that query fails.
+  Future<void> _onFeatureTapped(
+    Point<double> point,
+    LatLng coordinates,
+    String id,
+    String layerId,
+    Annotation? annotation,
+  ) async {
+    if (layerId != _eventsLayerId) return;
+    final controller = _controller;
+    if (controller == null || !mounted) return;
+
+    String? eventId;
+    try {
+      final features = await controller.queryRenderedFeatures(point, const [
+        _eventsLayerId,
+      ], null);
+      if (features.isNotEmpty) {
+        final dynamic feature = features.first;
+        final dynamic properties = feature['properties'];
+        eventId = properties?['eventId']?.toString();
+      }
+    } on Object {
+      // Fall back to the raw feature id below.
+    }
+
+    eventId ??= id;
+    if (!mounted) return;
+
+    Event? tapped;
+    for (final event in _events) {
+      if (event.id == eventId) {
+        tapped = event;
+        break;
+      }
+    }
+    if (tapped == null) return;
+
+    widget.onSelectedEventChanged?.call(tapped);
+  }
+
+  /// Closes the detail sheet when the map background is tapped.
+  void _dismissSelectedEvent(Point<double> point, LatLng coordinates) {
+    if (widget.selectedEvent == null) return;
+    widget.onSelectedEventChanged?.call(null);
   }
 
   Future<void> _onStyleLoaded() async {
@@ -212,7 +295,12 @@ class _MapState extends State<Map> {
         await controller.addImage(iconId, bytes);
         features.add({
           'type': 'Feature',
-          'properties': {'icon': iconId, 'name': event.name},
+          'id': event.id,
+          'properties': {
+            'icon': iconId,
+            'name': event.name,
+            'eventId': event.id,
+          },
           'geometry': {
             'type': 'Point',
             'coordinates': [event.longitude!, event.latitude!],
@@ -253,10 +341,7 @@ class _MapState extends State<Map> {
     if (events.length == 1) {
       final only = events.single;
       await controller.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(only.latitude!, only.longitude!),
-          13,
-        ),
+        CameraUpdate.newLatLngZoom(LatLng(only.latitude!, only.longitude!), 13),
         duration: const Duration(milliseconds: 500),
       );
       return;
@@ -376,7 +461,8 @@ class _MapState extends State<Map> {
     // Re-render when the event list changes, and when the theme changes — the
     // pin bitmaps bake in the theme's colours, so a palette switch has to
     // re-upload them to stay in step.
-    final themeChanged = colors.accentColor != _accentBeforeBuild ||
+    final themeChanged =
+        colors.accentColor != _accentBeforeBuild ||
         colors.cardColor != _cardBeforeBuild;
     if (!identical(events, _events) || themeChanged) {
       _events = events;
@@ -391,12 +477,26 @@ class _MapState extends State<Map> {
       });
     }
 
+    // A refresh can drop the event whose sheet is open; close it rather than
+    // leaving stale details on screen.
+    final selected = widget.selectedEvent;
+    if (selected != null && !events.any((event) => event.id == selected.id)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final current = widget.selectedEvent;
+        if (current != null &&
+            !_events.any((event) => event.id == current.id)) {
+          widget.onSelectedEventChanged?.call(null);
+        }
+      });
+    }
+
     return Stack(
       children: [
         MapLibreMap(
-          onMapCreated: (MapLibreMapController controller) =>
-              _controller = controller,
+          onMapCreated: _onMapCreated,
           onStyleLoadedCallback: _onStyleLoaded,
+          onMapClick: _dismissSelectedEvent,
           initialCameraPosition: const CameraPosition(
             target: LatLng(43.57, 1.464),
             zoom: 12,
@@ -493,11 +593,7 @@ class _LocateButton extends StatelessWidget {
                       color: colors.accentColor,
                     ),
                   )
-                : Icon(
-                    Icons.my_location,
-                    size: 22,
-                    color: colors.accentColor,
-                  ),
+                : Icon(Icons.my_location, size: 22, color: colors.accentColor),
           ),
         ),
       ),

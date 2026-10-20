@@ -13,8 +13,7 @@ import 'package:gathermap/features/profile/presentation/profile_controller.dart'
 /// Constructing a controller must never touch the network, so every method
 /// throws rather than returning a neutral value.
 class _UntouchableEventRepository implements EventRepository {
-  Never _untouchable() =>
-      fail('the repository was called during construction');
+  Never _untouchable() => fail('the repository was called during construction');
 
   @override
   Future<List<Event>> fetch({EventScope scope = EventScope.all}) async =>
@@ -54,6 +53,7 @@ void main() {
     final dependencies = AppDependencies();
 
     expect(dependencies.eventRepository, isNotNull);
+    expect(dependencies.eventGuestRepository, isNotNull);
   });
 
   test('a controller can be built without a Supabase client', () {
