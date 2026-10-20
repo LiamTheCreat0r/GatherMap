@@ -22,20 +22,42 @@
 |methods|camelCase|
 
 ## Project structure
+
+Feature-first, with a shared core. Each feature owns its own `data/`, `domain/`
+and `presentation/` slices; dependencies only ever point inward
+(`presentation → domain ← data`).
+
     lib/
-    ├── main.dart
-    ├── models/ (Request to database)
-        ├── todo.dart
-        └── app_user.dart
-    ├── controllers/
-        ├── auth_controller.dart
-        └── todo_controller.dart
-    ├── views/
-        ├── login_view.dart
-        ├── todo_list_view.dart
-        └── widgets/
-    ├── services/
-        └── supabase_service.dart
-    └── core/
-        ├── routes.dart
-        └── theme.dart
+    ├── main.dart              # bootstrap: Supabase.initialize → runApp
+    ├── app/
+    │   ├── app.dart           # MyApp: provider scope, theme, routes
+    │   └── shell/             # nav_bar_shell.dart, navbar.dart
+    ├── core/                  # cross-feature, no feature imports
+    │   ├── config/            # environment.dart
+    │   ├── di/                # providers.dart — the only place impls are chosen
+    │   ├── error/             # describe_error.dart
+    │   ├── logging/           # logs.dart
+    │   ├── routing/           # app_routes.dart
+    │   ├── state/             # base_controller.dart
+    │   ├── theme/             # app_themes, custom_colors, custom_text_styles
+    │   └── widgets/           # page_header, section_title, avatar_row, loading_dots
+    ├── data/
+    │   └── supabase/          # supabase_service.dart
+    ├── models/                # Supadart output — generated, never hand-edited
+    └── features/
+        └── events/
+            ├── data/          # remote data source, mapper, repository impl, address_service
+            ├── domain/        # entity, repository contract, pure rules
+            └── presentation/  # controller, pages, widgets
+
+## Layer rules
+
+|Layer|May import|Must not import|
+|-----|----------|---------------|
+|`domain/`|other `domain/` files|Flutter, Supabase, `models/`|
+|`data/`|`domain/`, `core/`, `data/`, `models/`|`presentation/`|
+|`presentation/`|`domain/`, `core/`, Flutter|Supabase, `data/`|
+
+Controllers reach I/O through a repository interface declared in `domain/`;
+the Supabase implementation is selected once, in `core/di/providers.dart`.
+Generated row classes stop at the mapper in `data/`.

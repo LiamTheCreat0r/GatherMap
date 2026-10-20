@@ -1,9 +1,9 @@
 // Basic widget tests for the app's navigation shell.
 //
-// The shell is hosted directly on `AppProviders` rather than through `MyApp`:
-// these tests are about the tab bar, and going through the gate would mean
-// stubbing a session first. Everything else — providers, routes, theme — is the
-// same wiring the app uses, so the shell under test is the real one.
+// The shell is hosted directly on `buildProviderScope` rather than through
+// `MyApp`: these tests are about the tab bar, and going through the gate would
+// mean stubbing a session first. Everything else — providers, routes, theme —
+// is the same wiring the app uses, so the shell under test is the real one.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -12,11 +12,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
-import 'package:gathermap/core/route.dart';
+import 'package:gathermap/app/shell/nav_bar_shell.dart';
+import 'package:gathermap/app/shell/navbar.dart';
+import 'package:gathermap/core/di/providers.dart';
+import 'package:gathermap/core/routing/app_routes.dart';
 import 'package:gathermap/core/theme/app_themes.dart';
-import 'package:gathermap/main.dart';
-import 'package:gathermap/views/widgets/navbar.dart';
-import 'package:gathermap/views/widgets/nav_bar_shell.dart';
 
 /// A no-op MapLibre platform used while the navbar shell is under test.
 ///
@@ -45,7 +45,7 @@ class _FakeMapLibrePlatform extends MapLibreMethodChannel {
 
 /// The signed-in app: the tab shell on the app's own controller wiring.
 Widget _shell() {
-  return AppProviders(
+  return buildProviderScope(
     child: MaterialApp(
       theme: AppThemes.lightTheme,
       navigatorObservers: [currentRouteObserver],

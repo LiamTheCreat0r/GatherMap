@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gathermap/controllers/auth_controller.dart';
-import 'package:gathermap/services/supabase_service.dart';
+import 'package:gathermap/data/supabase/supabase_service.dart';
+import 'package:gathermap/features/auth/presentation/auth_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
