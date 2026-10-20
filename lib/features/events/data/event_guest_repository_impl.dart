@@ -24,11 +24,11 @@ class SupabaseEventGuestRepository implements EventGuestRepository {
         if (invitation.userId.isNotEmpty) invitation.userId,
     }.toList();
 
-    final users = await _source.fetchUsersByIds(ids);
+    final profiles = await _source.fetchProfilesByIds(ids);
 
     return _mapper.toBook(
       invitations: invitations,
-      users: users,
+      profiles: profiles,
       ownerId: ownerId,
     );
   }

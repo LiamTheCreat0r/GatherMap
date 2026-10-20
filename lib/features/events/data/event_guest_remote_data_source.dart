@@ -2,10 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../data/supabase/supabase_service.dart';
 import '../../../../models/event_invitation.dart' as invitation;
+import '../../../../models/profile.dart' as row;
 import '../../../../models/supadart_header.dart';
-import '../../../../models/user.dart' as row;
 
-/// Raw `event_invitation` + `user` access for the event detail sheet.
+/// Raw `event_invitation` + `profiles` access for the event detail sheet.
 ///
 /// Two queries rather than an embedded select: the invitation table and the
 /// profile table are joined in [EventGuestMapper], so the generated row classes
@@ -31,9 +31,9 @@ class EventGuestRemoteDataSource {
 
   /// Profiles whose ids are in [ids]. Returns an empty list for an empty input
   /// instead of issuing a query with an invalid `in` filter.
-  Future<List<row.User>> fetchUsersByIds(List<String> ids) async {
+  Future<List<row.Profile>> fetchProfilesByIds(List<String> ids) async {
     if (ids.isEmpty) return const [];
-    final rows = await client.user.select().inFilter(row.User.c_id, ids);
-    return row.User.converter(rows);
+    final rows = await client.profile.select().inFilter(row.Profile.c_id, ids);
+    return row.Profile.converter(rows);
   }
 }

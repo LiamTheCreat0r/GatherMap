@@ -1,25 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gathermap/features/events/data/event_guest_mapper.dart';
 import 'package:gathermap/models/event_invitation.dart' as invitation;
-import 'package:gathermap/models/user.dart' as row;
+import 'package:gathermap/models/profile.dart' as row;
 
-row.User _user({
+row.Profile _profile({
   required String id,
   required String name,
   required String surname,
-  String username = 'handle',
-}) => row.User(
+  String? username = 'handle',
+}) => row.Profile(
   id: id,
-  createdAt: DateTime.utc(2026),
-  birthdate: DateTime.utc(2000),
   username: username,
   name: name,
   surname: surname,
+  birthdate: DateTime.utc(2000),
   city: 'Toulouse',
-  email: '$username@example.com',
-  hashPassword: 'hash',
   profilePicture: null,
   privateAccount: false,
+  onboardingCompleted: true,
+  createdAt: DateTime.utc(2026),
 );
 
 invitation.EventInvitation _invitation(String userId, bool? accepted) =>
@@ -41,10 +40,10 @@ void main() {
         _invitation('u2', null),
         _invitation('u3', false),
       ],
-      users: [
-        _user(id: 'u1', name: 'Léa', surname: 'Martin', username: 'lea'),
-        _user(id: 'u2', name: 'Tom', surname: 'Bernard', username: 'tom'),
-        _user(id: 'u3', name: 'Inès', surname: 'Petit', username: 'ines'),
+      profiles: [
+        _profile(id: 'u1', name: 'Léa', surname: 'Martin', username: 'lea'),
+        _profile(id: 'u2', name: 'Tom', surname: 'Bernard', username: 'tom'),
+        _profile(id: 'u3', name: 'Inès', surname: 'Petit', username: 'ines'),
       ],
       ownerId: 'u1',
     );
@@ -61,7 +60,7 @@ void main() {
   test('a profile hidden by RLS still counts as a guest', () {
     final book = mapper.toBook(
       invitations: [_invitation('missing', true)],
-      users: const [],
+      profiles: const [],
       ownerId: 'owner',
     );
 
@@ -72,7 +71,7 @@ void main() {
 
   test('falls back to the username when the full name is empty', () {
     final person = mapper.toPerson(
-      _user(id: 'u1', name: '', surname: '', username: 'lea'),
+      _profile(id: 'u1', name: '', surname: '', username: 'lea'),
     );
 
     expect(person?.displayName, 'lea');
