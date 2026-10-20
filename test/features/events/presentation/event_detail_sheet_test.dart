@@ -160,6 +160,27 @@ void main() {
     expect(after, moreOrLessEquals(0, epsilon: 1));
   });
 
+  testWidgets('dragging down closes the sheet', (tester) async {
+    final controller = EventGuestController(
+      _FakeGuestRepository(book: _book()),
+    );
+    addTearDown(controller.dispose);
+    var closed = false;
+
+    await tester.pumpWidget(
+      _harness(_event(), controller, onClose: () => closed = true),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.drag(
+      find.byKey(const ValueKey('event-detail-scroll')),
+      const Offset(0, 240),
+    );
+    await tester.pumpAndSettle();
+
+    expect(closed, isTrue);
+  });
+
   testWidgets('guest tab lists invitations with their answers', (tester) async {
     final controller = EventGuestController(
       _FakeGuestRepository(book: _book()),

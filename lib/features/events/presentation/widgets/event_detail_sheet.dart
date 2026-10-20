@@ -64,6 +64,10 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
 
   _DetailTab _activeTab = _DetailTab.overview;
 
+  /// Guards against scheduling more than one close while a downward drag
+  /// keeps emitting size notifications.
+  bool _isDismissing = false;
+
   @override
   void initState() {
     super.initState();
@@ -93,6 +97,21 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     }
   }
 
+  /// Closes the sheet once a downward drag reaches the minimum extent.
+  ///
+  /// [DraggableScrollableSheet] only emits the notification; it does not know
+  /// how to dismiss its host, so the page removes the sheet here.
+  void _handleSheetNotification(DraggableScrollableNotification notification) {
+    if (!notification.shouldCloseOnMinExtent) return;
+    if (notification.extent > notification.minExtent + 0.001) return;
+    if (_isDismissing) return;
+
+    _isDismissing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onClose();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -102,72 +121,80 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     final accent = eventColorFromHex(event.color, colors.accentColor);
     final isUpcoming = eventIsUpcoming(event.scheduledAt);
 
-    return DraggableScrollableSheet(
-      key: const ValueKey('event-detail-sheet'),
-      controller: _sheetController,
-      initialChildSize: _compactSize,
-      minChildSize: 0.18,
-      maxChildSize: _expandedSize,
-      snap: true,
-      snapSizes: const [_compactSize, _expandedSize],
-      builder: (context, scrollController) {
-        return DecoratedBox(
-          key: const ValueKey('event-detail-panel'),
-          decoration: BoxDecoration(
-            color: colors.cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-            border: Border(top: BorderSide(color: colors.borderColor)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.24),
-                blurRadius: 18,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  key: const ValueKey('event-detail-scroll'),
-                  controller: scrollController,
-                  padding: EdgeInsets.zero,
-                  children: [
-                    const _DragHandle(),
-                    _CompactHeader(
-                      event: event,
-                      accent: accent,
-                      isUpcoming: isUpcoming,
-                      organizer: guestController.organizer,
-                      onClose: widget.onClose,
-                    ),
-                    _RsvpChips(
-                      attending: guestController.attending,
-                      declined: guestController.declined,
-                    ),
-                    _TabStrip(
-                      active: _activeTab,
-                      accent: accent,
-                      onSelected: _selectTab,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: _buildTab(
-                        guestController,
-                        accent: accent,
-                        colors: colors,
-                        textStyles: textStyles,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-              _RsvpActionBar(onAttend: () {}, onDecline: () {}),
-            ],
-          ),
-        );
+    return NotificationListener<DraggableScrollableNotification>(
+      onNotification: (notification) {
+        _handleSheetNotification(notification);
+        return false;
       },
+      child: DraggableScrollableSheet(
+        key: const ValueKey('event-detail-sheet'),
+        controller: _sheetController,
+        initialChildSize: _compactSize,
+        minChildSize: 0.18,
+        maxChildSize: _expandedSize,
+        snap: true,
+        snapSizes: const [_compactSize, _expandedSize],
+        builder: (context, scrollController) {
+          return DecoratedBox(
+            key: const ValueKey('event-detail-panel'),
+            decoration: BoxDecoration(
+              color: colors.cardColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
+              border: Border(top: BorderSide(color: colors.borderColor)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.24),
+                  blurRadius: 18,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    key: const ValueKey('event-detail-scroll'),
+                    controller: scrollController,
+                    padding: EdgeInsets.zero,
+                    children: [
+                      const _DragHandle(),
+                      _CompactHeader(
+                        event: event,
+                        accent: accent,
+                        isUpcoming: isUpcoming,
+                        organizer: guestController.organizer,
+                        onClose: widget.onClose,
+                      ),
+                      _RsvpChips(
+                        attending: guestController.attending,
+                        declined: guestController.declined,
+                      ),
+                      _TabStrip(
+                        active: _activeTab,
+                        accent: accent,
+                        onSelected: _selectTab,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: _buildTab(
+                          guestController,
+                          accent: accent,
+                          colors: colors,
+                          textStyles: textStyles,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+                _RsvpActionBar(onAttend: () {}, onDecline: () {}),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
