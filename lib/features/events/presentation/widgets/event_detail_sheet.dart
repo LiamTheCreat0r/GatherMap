@@ -210,16 +210,33 @@ class _EventDetailSheetState extends State<EventDetailSheet>
                           controller: _contentController,
                           padding: EdgeInsets.zero,
                           children: [
-                            _CompactHeader(
-                              event: event,
-                              accent: accent,
-                              isUpcoming: isUpcoming,
-                              organizer: guestController.organizer,
-                              onClose: widget.onClose,
-                            ),
-                            _RsvpChips(
-                              attending: guestController.attending,
-                              declined: guestController.declined,
+                            // The whole header area above the tab menu is a
+                            // drag surface: title, date, organiser and RSVP
+                            // counts all move the sheet rather than scrolling.
+                            GestureDetector(
+                              key: const ValueKey('event-detail-header'),
+                              behavior: HitTestBehavior.opaque,
+                              onVerticalDragStart: (_) =>
+                                  _sheetAnimation.stop(),
+                              onVerticalDragUpdate: (details) =>
+                                  _onHandleDragUpdate(details, availableHeight),
+                              onVerticalDragEnd: _onHandleDragEnd,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _CompactHeader(
+                                    event: event,
+                                    accent: accent,
+                                    isUpcoming: isUpcoming,
+                                    organizer: guestController.organizer,
+                                    onClose: widget.onClose,
+                                  ),
+                                  _RsvpChips(
+                                    attending: guestController.attending,
+                                    declined: guestController.declined,
+                                  ),
+                                ],
+                              ),
                             ),
                             _TabStrip(
                               active: _activeTab,

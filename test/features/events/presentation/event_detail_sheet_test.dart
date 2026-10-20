@@ -160,6 +160,29 @@ void main() {
     expect(after, moreOrLessEquals(0, epsilon: 1));
   });
 
+  testWidgets('dragging the header expands the sheet', (tester) async {
+    final controller = EventGuestController(
+      _FakeGuestRepository(book: _book()),
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(_harness(_event(), controller));
+    await tester.pumpAndSettle();
+
+    final panel = find.byKey(const ValueKey('event-detail-panel'));
+    final before = tester.getTopLeft(panel).dy;
+
+    await tester.drag(
+      find.byKey(const ValueKey('event-detail-header')),
+      const Offset(0, -600),
+    );
+    await tester.pumpAndSettle();
+
+    final after = tester.getTopLeft(panel).dy;
+    expect(after, lessThan(before));
+    expect(after, moreOrLessEquals(0, epsilon: 1));
+  });
+
   testWidgets('scrolling content does not resize the sheet', (tester) async {
     final controller = EventGuestController(
       _FakeGuestRepository(book: _book()),
@@ -171,17 +194,25 @@ void main() {
 
     final panel = find.byKey(const ValueKey('event-detail-panel'));
     final content = find.byKey(const ValueKey('event-detail-scroll'));
-    final title = find.text('Rooftop Party');
+
+    // Expand first so the scrolling area is the detail content, not the
+    // compact header.
+    await tester.drag(
+      find.byKey(const ValueKey('event-detail-handle')),
+      const Offset(0, -600),
+    );
+    await tester.pumpAndSettle();
+
     final sheetTop = tester.getTopLeft(panel).dy;
-    final titleTop = tester.getTopLeft(title).dy;
+    final tabTop = tester.getTopLeft(find.text('APERÇU')).dy;
 
     await tester.drag(content, const Offset(0, -40));
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(panel).dy, moreOrLessEquals(sheetTop, epsilon: 1));
-    expect(tester.getTopLeft(title).dy, lessThan(titleTop));
+    expect(tester.getTopLeft(find.text('APERÇU')).dy, lessThan(tabTop));
 
-    await tester.drag(content, const Offset(0, 200));
+    await tester.drag(content, const Offset(0, 300));
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(panel).dy, moreOrLessEquals(sheetTop, epsilon: 1));
@@ -217,10 +248,10 @@ void main() {
     await tester.pumpWidget(_harness(_event(), controller));
     await tester.pumpAndSettle();
 
-    // Scroll the content (not the sheet) until the tab strip is visible.
+    // Expand with the drag handle so the tab strip is visible.
     await tester.drag(
-      find.byKey(const ValueKey('event-detail-scroll')),
-      const Offset(0, -140),
+      find.byKey(const ValueKey('event-detail-handle')),
+      const Offset(0, -600),
     );
     await tester.pumpAndSettle();
 
@@ -247,8 +278,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.drag(
-      find.byKey(const ValueKey('event-detail-scroll')),
-      const Offset(0, -140),
+      find.byKey(const ValueKey('event-detail-handle')),
+      const Offset(0, -600),
     );
     await tester.pumpAndSettle();
 
