@@ -36,8 +36,9 @@ extension on _DetailTab {
 ///
 /// Non-modal: it is placed in the map page's `Stack`, above the map, header and
 /// create-event button, so the map remains interactive behind it. It starts
-/// compact (title, date, RSVP counts and the action bar) and drags up to fill
-/// the page body, revealing the tabbed detail content.
+/// compact (title, date, RSVP counts and the action bar); dragging its handle
+/// expands it to fill the page body, while the detail content scrolls on its
+/// own without resizing the sheet.
 class EventDetailSheet extends StatefulWidget {
   const EventDetailSheet({
     super.key,
@@ -55,22 +56,32 @@ class EventDetailSheet extends StatefulWidget {
   State<EventDetailSheet> createState() => _EventDetailSheetState();
 }
 
-class _EventDetailSheetState extends State<EventDetailSheet> {
+class _EventDetailSheetState extends State<EventDetailSheet>
+    with SingleTickerProviderStateMixin {
+  static const double _minSize = 0.18;
   static const double _compactSize = 0.36;
   static const double _expandedSize = 1;
 
-  final DraggableScrollableController _sheetController =
-      DraggableScrollableController();
+  late final AnimationController _sheetAnimation;
+
+  /// Scrolls only the panel content; it never resizes the sheet.
+  final ScrollController _contentController = ScrollController();
 
   _DetailTab _activeTab = _DetailTab.overview;
 
-  /// Guards against scheduling more than one close while a downward drag
-  /// keeps emitting size notifications.
+  /// Guards against closing more than once after a downward drag.
   bool _isDismissing = false;
 
   @override
   void initState() {
     super.initState();
+    _sheetAnimation = AnimationController(
+      vsync: this,
+      lowerBound: _minSize,
+      upperBound: _expandedSize,
+      value: _compactSize,
+      duration: const Duration(milliseconds: 260),
+    );
     // Deferred so the controller's loading notification lands after this build
     // rather than during it.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,15 +92,15 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
 
   @override
   void dispose() {
-    _sheetController.dispose();
+    _sheetAnimation.dispose();
+    _contentController.dispose();
     super.dispose();
   }
 
   void _selectTab(_DetailTab tab) {
     setState(() => _activeTab = tab);
-    final controller = _sheetController;
-    if (controller.isAttached && controller.size < 0.6) {
-      controller.animateTo(
+    if (_sheetAnimation.value < 0.6) {
+      _sheetAnimation.animateTo(
         _expandedSize,
         duration: const Duration(milliseconds: 280),
         curve: Curves.easeOutCubic,
@@ -97,16 +108,43 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     }
   }
 
-  /// Closes the sheet once a downward drag reaches the minimum extent.
+  /// Resizes the sheet while the drag handle is being dragged.
   ///
-  /// [DraggableScrollableSheet] only emits the notification; it does not know
-  /// how to dismiss its host, so the page removes the sheet here.
-  void _handleSheetNotification(DraggableScrollableNotification notification) {
-    if (!notification.shouldCloseOnMinExtent) return;
-    if (notification.extent > notification.minExtent + 0.001) return;
+  /// Content scrolling does not touch the sheet: only this handle calls into
+  /// the animation controller.
+  void _onHandleDragUpdate(DragUpdateDetails details, double availableHeight) {
+    if (availableHeight <= 0) return;
+    final next = _sheetAnimation.value - details.delta.dy / availableHeight;
+    _sheetAnimation.value = next.clamp(_minSize, _expandedSize);
+  }
+
+  void _onHandleDragEnd(DragEndDetails details) {
     if (_isDismissing) return;
 
+    final size = _sheetAnimation.value;
+    final velocity = details.velocity.pixelsPerSecond.dy;
+    final closeThreshold = (_minSize + _compactSize) / 2;
+
+    if (size < closeThreshold ||
+        (velocity > 600 && size < _compactSize + 0.06)) {
+      _dismiss();
+      return;
+    }
+
+    final target = size < (_compactSize + _expandedSize) / 2
+        ? _compactSize
+        : _expandedSize;
+    _sheetAnimation.animateTo(
+      target,
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _dismiss() {
+    if (_isDismissing) return;
     _isDismissing = true;
+    _sheetAnimation.stop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) widget.onClose();
     });
@@ -121,80 +159,95 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
     final accent = eventColorFromHex(event.color, colors.accentColor);
     final isUpcoming = eventIsUpcoming(event.scheduledAt);
 
-    return NotificationListener<DraggableScrollableNotification>(
-      onNotification: (notification) {
-        _handleSheetNotification(notification);
-        return false;
-      },
-      child: DraggableScrollableSheet(
-        key: const ValueKey('event-detail-sheet'),
-        controller: _sheetController,
-        initialChildSize: _compactSize,
-        minChildSize: 0.18,
-        maxChildSize: _expandedSize,
-        snap: true,
-        snapSizes: const [_compactSize, _expandedSize],
-        builder: (context, scrollController) {
-          return DecoratedBox(
-            key: const ValueKey('event-detail-panel'),
-            decoration: BoxDecoration(
-              color: colors.cardColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(22),
-              ),
-              border: Border(top: BorderSide(color: colors.borderColor)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.24),
-                  blurRadius: 18,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    key: const ValueKey('event-detail-scroll'),
-                    controller: scrollController,
-                    padding: EdgeInsets.zero,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableHeight = constraints.maxHeight;
+        return AnimatedBuilder(
+          animation: _sheetAnimation,
+          builder: (context, _) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                key: const ValueKey('event-detail-sheet'),
+                width: double.infinity,
+                height: availableHeight * _sheetAnimation.value,
+                child: DecoratedBox(
+                  key: const ValueKey('event-detail-panel'),
+                  decoration: BoxDecoration(
+                    color: colors.cardColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(22),
+                    ),
+                    border: Border(top: BorderSide(color: colors.borderColor)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.24),
+                        blurRadius: 18,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
                     children: [
-                      const _DragHandle(),
-                      _CompactHeader(
-                        event: event,
-                        accent: accent,
-                        isUpcoming: isUpcoming,
-                        organizer: guestController.organizer,
-                        onClose: widget.onClose,
-                      ),
-                      _RsvpChips(
-                        attending: guestController.attending,
-                        declined: guestController.declined,
-                      ),
-                      _TabStrip(
-                        active: _activeTab,
-                        accent: accent,
-                        onSelected: _selectTab,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: _buildTab(
-                          guestController,
-                          accent: accent,
-                          colors: colors,
-                          textStyles: textStyles,
+                      // Only this handle resizes the sheet. The list below
+                      // scrolls independently, so reading the details never
+                      // drags the whole window up or down.
+                      GestureDetector(
+                        key: const ValueKey('event-detail-handle'),
+                        behavior: HitTestBehavior.opaque,
+                        onVerticalDragStart: (_) => _sheetAnimation.stop(),
+                        onVerticalDragUpdate: (details) =>
+                            _onHandleDragUpdate(details, availableHeight),
+                        onVerticalDragEnd: _onHandleDragEnd,
+                        child: const SizedBox(
+                          width: double.infinity,
+                          child: _DragHandle(),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      Expanded(
+                        child: ListView(
+                          key: const ValueKey('event-detail-scroll'),
+                          controller: _contentController,
+                          padding: EdgeInsets.zero,
+                          children: [
+                            _CompactHeader(
+                              event: event,
+                              accent: accent,
+                              isUpcoming: isUpcoming,
+                              organizer: guestController.organizer,
+                              onClose: widget.onClose,
+                            ),
+                            _RsvpChips(
+                              attending: guestController.attending,
+                              declined: guestController.declined,
+                            ),
+                            _TabStrip(
+                              active: _activeTab,
+                              accent: accent,
+                              onSelected: _selectTab,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: _buildTab(
+                                guestController,
+                                accent: accent,
+                                colors: colors,
+                                textStyles: textStyles,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      ),
+                      _RsvpActionBar(onAttend: () {}, onDecline: () {}),
                     ],
                   ),
                 ),
-                _RsvpActionBar(onAttend: () {}, onDecline: () {}),
-              ],
-            ),
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

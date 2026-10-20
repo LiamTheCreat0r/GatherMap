@@ -150,7 +150,7 @@ void main() {
     final before = tester.getTopLeft(panel).dy;
 
     await tester.drag(
-      find.byKey(const ValueKey('event-detail-scroll')),
+      find.byKey(const ValueKey('event-detail-handle')),
       const Offset(0, -600),
     );
     await tester.pumpAndSettle();
@@ -158,6 +158,33 @@ void main() {
     final after = tester.getTopLeft(panel).dy;
     expect(after, lessThan(before));
     expect(after, moreOrLessEquals(0, epsilon: 1));
+  });
+
+  testWidgets('scrolling content does not resize the sheet', (tester) async {
+    final controller = EventGuestController(
+      _FakeGuestRepository(book: _book()),
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(_harness(_event(), controller));
+    await tester.pumpAndSettle();
+
+    final panel = find.byKey(const ValueKey('event-detail-panel'));
+    final content = find.byKey(const ValueKey('event-detail-scroll'));
+    final title = find.text('Rooftop Party');
+    final sheetTop = tester.getTopLeft(panel).dy;
+    final titleTop = tester.getTopLeft(title).dy;
+
+    await tester.drag(content, const Offset(0, -40));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(panel).dy, moreOrLessEquals(sheetTop, epsilon: 1));
+    expect(tester.getTopLeft(title).dy, lessThan(titleTop));
+
+    await tester.drag(content, const Offset(0, 200));
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(panel).dy, moreOrLessEquals(sheetTop, epsilon: 1));
   });
 
   testWidgets('dragging down closes the sheet', (tester) async {
@@ -173,7 +200,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.drag(
-      find.byKey(const ValueKey('event-detail-scroll')),
+      find.byKey(const ValueKey('event-detail-handle')),
       const Offset(0, 240),
     );
     await tester.pumpAndSettle();
@@ -190,9 +217,10 @@ void main() {
     await tester.pumpWidget(_harness(_event(), controller));
     await tester.pumpAndSettle();
 
+    // Scroll the content (not the sheet) until the tab strip is visible.
     await tester.drag(
       find.byKey(const ValueKey('event-detail-scroll')),
-      const Offset(0, -320),
+      const Offset(0, -140),
     );
     await tester.pumpAndSettle();
 
@@ -220,7 +248,7 @@ void main() {
 
     await tester.drag(
       find.byKey(const ValueKey('event-detail-scroll')),
-      const Offset(0, -320),
+      const Offset(0, -140),
     );
     await tester.pumpAndSettle();
 
