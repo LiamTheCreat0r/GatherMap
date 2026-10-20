@@ -28,6 +28,18 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Auth deep links. Supabase sends the user back to
+                 app.gathermap://login-callback after an OAuth sign-in or a
+                 password recovery email; app_links hands the URL to
+                 supabase_flutter. Keep the scheme and host in step with
+                 AUTH_REDIRECT_URL in lib/controllers/auth_controller.dart and
+                 with the Redirect URLs list in the Supabase dashboard. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="app.gathermap" android:host="login-callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

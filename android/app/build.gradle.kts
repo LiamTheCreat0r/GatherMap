@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gathermap"
+    namespace = "app.gathermap"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.gathermap"
+        applicationId = "app.gathermap"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

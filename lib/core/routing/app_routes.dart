@@ -16,11 +16,31 @@ class AppRoutes {
   // Detail routes — the bottom navigation is hidden on these.
   static const String eventDetail = '/events/:id';
 
+  // Auth routes — pushed over the gate, never inside the navigation shell.
+  static const String login = '/login';
+  static const String signUp = '/sign-up';
+  static const String forgotPassword = '/forgot-password';
+
   /// Route name patterns where the bottom navigation must be hidden.
   ///
   /// Add a pattern here (for example `'/settings/edit'`) and the navigation
   /// bar will automatically disappear while that route is on top.
   static const List<String> hiddenNavRoutes = [eventDetail];
+
+  /// Builds the routes that are pushed by name.
+  ///
+  /// The four tab pages are hosted directly by the navigation shell and are not
+  /// pushed, and the auth screens are opened with their own [MaterialPageRoute]
+  /// from the login page, so this handles the detail routes only.
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    if (isNavHidden(settings.name)) {
+      return MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const EventDetailPlaceholder(),
+      );
+    }
+    return null;
+  }
 
   /// Returns true when the bottom navigation should be hidden for [name].
   static bool isNavHidden(String? name) {
@@ -78,5 +98,18 @@ class CurrentRouteObserver extends NavigatorObserver {
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     CurrentRoute.name.value = newRoute?.settings.name;
+  }
+}
+
+/// Stand-in for the real event detail screen.
+///
+/// Its only job right now is to prove that pushing a detail route hides the
+/// bottom navigation bar, and popping it brings the bar back.
+class EventDetailPlaceholder extends StatelessWidget {
+  const EventDetailPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: Text('Event details')));
   }
 }

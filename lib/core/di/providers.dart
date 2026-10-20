@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/supabase/supabase_service.dart';
+import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/chats/presentation/chat_controller.dart';
 import '../../features/chats/presentation/message_controller.dart';
 import '../../features/circles/presentation/circle_controller.dart';
@@ -16,7 +17,7 @@ import '../../features/events/presentation/event_controller.dart';
 import '../../features/invitations/presentation/event_invitation_controller.dart';
 import '../../features/friends/presentation/blocked_user_controller.dart';
 import '../../features/friends/presentation/friend_controller.dart';
-import '../../features/profile/presentation/user_controller.dart';
+import '../../features/profile/presentation/profile_controller.dart';
 
 /// The concrete implementations the app runs against.
 ///
@@ -55,7 +56,17 @@ Widget buildProviderScope({
   return MultiProvider(
     providers: [
       Provider<AddressSearch>.value(value: deps.addressSearch),
-      ChangeNotifierProvider(create: (_) => UserController()),
+      ChangeNotifierProvider(create: (_) => AuthController()),
+
+      // The profile cache is not per-table: it follows the session, so it is a
+      // proxy over AuthController — `syncSession` loads the row on a sign-in
+      // and clears it on a sign-out. `AuthGate` is what calls
+      // `AuthController.initialize` to restore the persisted session.
+      ChangeNotifierProxyProvider<AuthController, ProfileController>(
+        create: (_) => ProfileController(),
+        update: (_, auth, profile) => profile!..syncSession(auth.userId),
+      ),
+
       ChangeNotifierProvider(
         create: (_) => EventController(deps.eventRepository),
       ),

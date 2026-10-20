@@ -42,7 +42,7 @@ dependencies:
     supabase_flutter: 3.0.0-dev.9
     intl: ^0.20.3
 
-    # state management for the controller layer (lib/controllers/)
+    # state management for the controller layer (lib/core/state/)
     provider: ^6.1.5
 
     # HTTP client used by the address geocoding service
