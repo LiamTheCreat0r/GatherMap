@@ -114,6 +114,7 @@ void main() {
     expect(find.textContaining('25 oct.'), findsOneWidget);
     expect(find.text('Je viens'), findsOneWidget);
     expect(find.text('Absent'), findsOneWidget);
+    expect(find.textContaining('peut-être', findRichText: true), findsNothing);
     expect(find.byKey(const ValueKey('rsvp-attend')), findsOneWidget);
     expect(find.byKey(const ValueKey('rsvp-decline')), findsOneWidget);
     expect(repository.requestedEventIds, ['evt-1']);
@@ -150,12 +151,13 @@ void main() {
 
     await tester.drag(
       find.byKey(const ValueKey('event-detail-scroll')),
-      const Offset(0, -320),
+      const Offset(0, -600),
     );
     await tester.pumpAndSettle();
 
     final after = tester.getTopLeft(panel).dy;
     expect(after, lessThan(before));
+    expect(after, moreOrLessEquals(0, epsilon: 1));
   });
 
   testWidgets('guest tab lists invitations with their answers', (tester) async {
@@ -181,7 +183,7 @@ void main() {
     expect(find.text('Inès'), findsOneWidget);
     expect(find.text('Marc'), findsOneWidget);
     expect(find.text('Présent'), findsNWidgets(2));
-    expect(find.text('Peut-être'), findsOneWidget);
+    expect(find.text('En attente'), findsOneWidget);
     // One guest status pill plus the always-visible RSVP action button.
     expect(find.text('Absent'), findsNWidgets(2));
   });

@@ -11,7 +11,6 @@ import '../../../../core/widgets/loading_dots.dart';
 import '../../../../services/location_service.dart';
 import '../../../events/domain/event.dart';
 import '../../../events/presentation/event_controller.dart';
-import '../../../events/presentation/widgets/event_detail_sheet.dart';
 import 'event_pin.dart';
 
 /// GeoJSON source holding every pinned event as a point feature.
@@ -51,11 +50,25 @@ const String _userLocationLayerId = 'user-location-layer';
 /// accent-coloured dot. Denials and disabled services surface as a snack bar
 /// with a shortcut to the relevant settings.
 class Map extends StatefulWidget {
-  const Map({super.key, this.locationService = const LocationService()});
+  const Map({
+    super.key,
+    this.locationService = const LocationService(),
+    this.selectedEvent,
+    this.onSelectedEventChanged,
+  });
 
   /// Resolves the device's position (with permission) for the locate button.
   /// Injectable so tests can supply a fake provider.
   final LocationService locationService;
+
+  /// Event whose detail sheet is open, or `null` when no sheet is shown.
+  ///
+  /// The sheet itself lives one level up in `MapPage`, above the header and
+  /// floating button; this widget only reports pin selections.
+  final Event? selectedEvent;
+
+  /// Reports a pin tap (`event`) or a map-background tap (`null`).
+  final ValueChanged<Event?>? onSelectedEventChanged;
 
   @override
   State<Map> createState() => _MapState();
@@ -87,9 +100,6 @@ class _MapState extends State<Map> {
 
   /// True while a locate is in flight; the button shows a spinner.
   bool _isLocating = false;
-
-  /// The event currently shown in the bottom detail sheet, if any.
-  Event? _selectedEvent;
 
   /// Latest theme values captured during build, so the async sync can render
   /// pin bitmaps without touching `Theme.of` outside the build phase.
@@ -177,13 +187,13 @@ class _MapState extends State<Map> {
     }
     if (tapped == null) return;
 
-    setState(() => _selectedEvent = tapped);
+    widget.onSelectedEventChanged?.call(tapped);
   }
 
   /// Closes the detail sheet when the map background is tapped.
   void _dismissSelectedEvent(Point<double> point, LatLng coordinates) {
-    if (_selectedEvent == null) return;
-    setState(() => _selectedEvent = null);
+    if (widget.selectedEvent == null) return;
+    widget.onSelectedEventChanged?.call(null);
   }
 
   Future<void> _onStyleLoaded() async {
@@ -469,14 +479,14 @@ class _MapState extends State<Map> {
 
     // A refresh can drop the event whose sheet is open; close it rather than
     // leaving stale details on screen.
-    final selected = _selectedEvent;
+    final selected = widget.selectedEvent;
     if (selected != null && !events.any((event) => event.id == selected.id)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        final current = _selectedEvent;
+        final current = widget.selectedEvent;
         if (current != null &&
             !_events.any((event) => event.id == current.id)) {
-          setState(() => _selectedEvent = null);
+          widget.onSelectedEventChanged?.call(null);
         }
       });
     }
@@ -522,17 +532,6 @@ class _MapState extends State<Map> {
             onPressed: _locateUser,
           ),
         ),
-        // Detail panel. Last so it draws over the map and the locate button
-        // while expanded; the map stays interactive in the space it does not
-        // cover because the sheet is not modal.
-        if (_selectedEvent != null)
-          Positioned.fill(
-            child: EventDetailSheet(
-              key: ValueKey('event-detail-${_selectedEvent!.id}'),
-              event: _selectedEvent!,
-              onClose: () => setState(() => _selectedEvent = null),
-            ),
-          ),
       ],
     );
   }

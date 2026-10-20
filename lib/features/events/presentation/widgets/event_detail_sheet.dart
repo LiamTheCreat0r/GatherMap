@@ -34,9 +34,10 @@ extension on _DetailTab {
 
 /// Google Maps-style bottom panel for one event.
 ///
-/// Non-modal: it is placed inside the map's `Stack`, so the map remains
-/// interactive behind it. It starts compact (title, date, RSVP counts and the
-/// action bar) and drags up to reveal the tabbed detail content.
+/// Non-modal: it is placed in the map page's `Stack`, above the map, header and
+/// create-event button, so the map remains interactive behind it. It starts
+/// compact (title, date, RSVP counts and the action bar) and drags up to fill
+/// the page body, revealing the tabbed detail content.
 class EventDetailSheet extends StatefulWidget {
   const EventDetailSheet({
     super.key,
@@ -56,7 +57,7 @@ class EventDetailSheet extends StatefulWidget {
 
 class _EventDetailSheetState extends State<EventDetailSheet> {
   static const double _compactSize = 0.36;
-  static const double _expandedSize = 0.92;
+  static const double _expandedSize = 1;
 
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
@@ -142,7 +143,6 @@ class _EventDetailSheetState extends State<EventDetailSheet> {
                     ),
                     _RsvpChips(
                       attending: guestController.attending,
-                      maybe: guestController.maybe,
                       declined: guestController.declined,
                     ),
                     _TabStrip(
@@ -412,16 +412,11 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
-/// Three RSVP count pills backed by the real invitation rows.
+/// Two RSVP count pills backed by the real invitation rows.
 class _RsvpChips extends StatelessWidget {
-  const _RsvpChips({
-    required this.attending,
-    required this.maybe,
-    required this.declined,
-  });
+  const _RsvpChips({required this.attending, required this.declined});
 
   final int attending;
-  final int maybe;
   final int declined;
 
   @override
@@ -437,14 +432,6 @@ class _RsvpChips extends StatelessWidget {
               count: attending,
               label: 'présents',
               color: colors.successColor,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _RsvpChip(
-              count: maybe,
-              label: 'peut-être',
-              color: colors.warningColor,
             ),
           ),
           const SizedBox(width: 8),
@@ -887,7 +874,7 @@ class _GuestRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, color) = switch (guest.accepted) {
       true => ('Présent', colors.successColor),
-      null => ('Peut-être', colors.warningColor),
+      null => ('En attente', colors.warningColor),
       false => ('Absent', colors.dangerColor),
     };
 
