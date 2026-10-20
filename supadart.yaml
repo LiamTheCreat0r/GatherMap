@@ -30,6 +30,9 @@ dart: false
 # Optional, used to map table names to class names(case-sensitive)
 # Use schema.table keys for tables outside the first schema
 mappings:
+    # `profiles` holds one row per auth.users row; the singular reads better
+    # (Profile / client.profile) than the generated plural.
+    profiles: Profile
     # books: book
     # categories: category
     # children: child

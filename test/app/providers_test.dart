@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gathermap/core/di/providers.dart';
 import 'package:gathermap/core/state/base_controller.dart';
+import 'package:gathermap/features/auth/presentation/auth_controller.dart';
 import 'package:gathermap/features/events/domain/event.dart';
 import 'package:gathermap/features/events/domain/event_repository.dart';
 import 'package:gathermap/features/events/presentation/event_controller.dart';
+import 'package:gathermap/features/profile/presentation/profile_controller.dart';
 
 /// An [EventRepository] that fails the test if anything is asked of it.
 ///
@@ -61,5 +63,22 @@ void main() {
     expect(controller.status, ControllerStatus.idle);
     expect(controller.error, isNull);
     expect(controller.events, isEmpty);
+  });
+
+  test('the session controllers build without a Supabase client', () {
+    // `AuthController` holds the session and `ProfileController` follows it;
+    // reading either at construction time would reach for the global client
+    // before `Supabase.initialize` has run (and in tests, where it never
+    // does). `AuthGate` is what calls `initialize()`.
+    final auth = AuthController();
+    final profile = ProfileController();
+    addTearDown(auth.dispose);
+    addTearDown(profile.dispose);
+
+    expect(auth.isInitialized, isFalse);
+    expect(auth.isSignedIn, isFalse);
+    expect(auth.status, ControllerStatus.idle);
+    expect(profile.current, isNull);
+    expect(profile.isLoaded, isFalse);
   });
 }

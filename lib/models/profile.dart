@@ -3,178 +3,169 @@
 // WARNING: Modifications may be overwritten. Please make changes in the Supadart configuration.
 import 'supadart_header.dart';
 
-class User implements SupadartClass<User> {
+class Profile implements SupadartClass<Profile> {
   final String? id;
-  final DateTime? createdAt;
-  final DateTime birthdate;
-  final String username;
+  final String? username;
   final String name;
   final String surname;
-  final String city;
-  final String email;
-  final String hashPassword;
+  final DateTime? birthdate;
+  final String? city;
   final String? profilePicture;
   final bool privateAccount;
+  final bool onboardingCompleted;
+  final DateTime? createdAt;
 
-  const User({
+  const Profile({
     required this.id,
-    required this.createdAt,
-    required this.birthdate,
     required this.username,
     required this.name,
     required this.surname,
+    required this.birthdate,
     required this.city,
-    required this.email,
-    required this.hashPassword,
-    this.profilePicture,
+    required this.profilePicture,
     required this.privateAccount,
+    required this.onboardingCompleted,
+    required this.createdAt,
   });
 
   static String get schema_name => 'public';
-  static String get table_name => 'user';
+  static String get table_name => 'profiles';
   static String get c_id => 'id';
-  static String get c_createdAt => 'created_at';
-  static String get c_birthdate => 'birthdate';
   static String get c_username => 'username';
   static String get c_name => 'name';
   static String get c_surname => 'surname';
+  static String get c_birthdate => 'birthdate';
   static String get c_city => 'city';
-  static String get c_email => 'email';
-  static String get c_hashPassword => 'hash_password';
   static String get c_profilePicture => 'profile_picture';
   static String get c_privateAccount => 'private_account';
+  static String get c_onboardingCompleted => 'onboarding_completed';
+  static String get c_createdAt => 'created_at';
 
-  static List<User> converter(List<Map<String, dynamic>> data) {
-    return data.map(User.fromJson).toList();
+  static List<Profile> converter(List<Map<String, dynamic>> data) {
+    return data.map(Profile.fromJson).toList();
   }
 
-  static User converterSingle(Map<String, dynamic> data) {
-    return User.fromJson(data);
+  static Profile converterSingle(Map<String, dynamic> data) {
+    return Profile.fromJson(data);
   }
 
   static Map<String, dynamic> _generateMap({
     String? id,
-    DateTime? createdAt,
-    DateTime? birthdate,
     String? username,
     String? name,
     String? surname,
+    DateTime? birthdate,
     String? city,
-    String? email,
-    String? hashPassword,
     String? profilePicture,
     bool? privateAccount,
+    bool? onboardingCompleted,
+    DateTime? createdAt,
   }) {
     return {
       'id': ?id,
-      if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
-      if (birthdate != null) 'birthdate': birthdate.toIso8601String(),
       'username': ?username,
       'name': ?name,
       'surname': ?surname,
+      if (birthdate != null) 'birthdate': birthdate.toIso8601String(),
       'city': ?city,
-      'email': ?email,
-      'hash_password': ?hashPassword,
       'profile_picture': ?profilePicture,
       'private_account': ?privateAccount,
+      'onboarding_completed': ?onboardingCompleted,
+      if (createdAt != null) 'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 
   static Map<String, dynamic> insert({
     String? id,
-    DateTime? createdAt,
-    required DateTime birthdate,
-    required String username,
-    required String name,
-    required String surname,
-    required String city,
-    required String email,
-    required String hashPassword,
+    String? username,
+    String? name,
+    String? surname,
+    DateTime? birthdate,
+    String? city,
     String? profilePicture,
     bool? privateAccount,
+    bool? onboardingCompleted,
+    DateTime? createdAt,
   }) {
     return _generateMap(
       id: id,
-      createdAt: createdAt,
-      birthdate: birthdate,
       username: username,
       name: name,
       surname: surname,
+      birthdate: birthdate,
       city: city,
-      email: email,
-      hashPassword: hashPassword,
       profilePicture: profilePicture,
       privateAccount: privateAccount,
+      onboardingCompleted: onboardingCompleted,
+      createdAt: createdAt,
     );
   }
 
   static Map<String, dynamic> update({
     String? id,
-    DateTime? createdAt,
-    DateTime? birthdate,
     String? username,
     String? name,
     String? surname,
+    DateTime? birthdate,
     String? city,
-    String? email,
-    String? hashPassword,
     String? profilePicture,
     bool? privateAccount,
+    bool? onboardingCompleted,
+    DateTime? createdAt,
   }) {
     return _generateMap(
       id: id,
-      createdAt: createdAt,
-      birthdate: birthdate,
       username: username,
       name: name,
       surname: surname,
+      birthdate: birthdate,
       city: city,
-      email: email,
-      hashPassword: hashPassword,
       profilePicture: profilePicture,
       privateAccount: privateAccount,
+      onboardingCompleted: onboardingCompleted,
+      createdAt: createdAt,
     );
   }
 
-  factory User.fromJson(Map<String, dynamic> jsonn) {
-    return User(
+  factory Profile.fromJson(Map<String, dynamic> jsonn) {
+    return Profile(
       id: jsonn['id'] != null ? jsonn['id'].toString() : '',
-      createdAt: jsonn['created_at'] != null
-          ? DateTime.parse(jsonn['created_at'].toString())
-          : DateTime.fromMillisecondsSinceEpoch(0),
-      birthdate: jsonn['birthdate'] != null
-          ? DateTime.parse(jsonn['birthdate'].toString())
-          : DateTime.fromMillisecondsSinceEpoch(0),
-      username: jsonn['username'] != null ? jsonn['username'].toString() : '',
+      username: jsonn['username'] != null
+          ? jsonn['username'].toString()
+          : null,
       name: jsonn['name'] != null ? jsonn['name'].toString() : '',
       surname: jsonn['surname'] != null ? jsonn['surname'].toString() : '',
-      city: jsonn['city'] != null ? jsonn['city'].toString() : '',
-      email: jsonn['email'] != null ? jsonn['email'].toString() : '',
-      hashPassword: jsonn['hash_password'] != null
-          ? jsonn['hash_password'].toString()
-          : '',
+      birthdate: jsonn['birthdate'] != null
+          ? DateTime.parse(jsonn['birthdate'].toString())
+          : null,
+      city: jsonn['city'] != null ? jsonn['city'].toString() : null,
       profilePicture: jsonn['profile_picture'] != null
           ? jsonn['profile_picture'].toString()
           : null,
       privateAccount: jsonn['private_account'] != null
           ? jsonn['private_account'] as bool
           : false,
+      onboardingCompleted: jsonn['onboarding_completed'] != null
+          ? jsonn['onboarding_completed'] as bool
+          : false,
+      createdAt: jsonn['created_at'] != null
+          ? DateTime.parse(jsonn['created_at'].toString())
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return _generateMap(
       id: id,
-      createdAt: createdAt,
-      birthdate: birthdate,
       username: username,
       name: name,
       surname: surname,
+      birthdate: birthdate,
       city: city,
-      email: email,
-      hashPassword: hashPassword,
       profilePicture: profilePicture,
       privateAccount: privateAccount,
+      onboardingCompleted: onboardingCompleted,
+      createdAt: createdAt,
     );
   }
 }

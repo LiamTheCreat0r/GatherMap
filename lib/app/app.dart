@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/di/providers.dart';
 import '../core/routing/app_routes.dart';
 import '../core/theme/app_themes.dart';
-import 'shell/nav_bar_shell.dart';
+import '../features/auth/presentation/auth_gate.dart';
 
 /// Root widget: wires the controller layer, theme and navigation.
 class MyApp extends StatelessWidget {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
             themeMode: mode,
             navigatorObservers: [currentRouteObserver],
             onGenerateRoute: _onGenerateRoute,
-            home: const NavBarShell(),
+            home: const AuthGate(),
           );
         },
       ),

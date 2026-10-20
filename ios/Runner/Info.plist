@@ -22,6 +22,25 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<!-- Auth deep links. Supabase sends the user back to
+	     app.gathermap://login-callback after an OAuth sign-in or a password
+	     recovery email; app_links hands the URL to supabase_flutter. Keep the
+	     scheme in step with AUTH_REDIRECT_URL in
+	     lib/controllers/auth_controller.dart and with the Redirect URLs list in
+	     the Supabase dashboard. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app.gathermap</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app.gathermap</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
